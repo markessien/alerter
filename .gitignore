@@ -1,4 +1,4 @@
 wxWidgets
-main.exe
-main.obj
-main.exe.manifest
+build
+*.exe
+*.obj
