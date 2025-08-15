@@ -16,6 +16,15 @@ public:
                        const wxString& message);
 
 private:
+    void CreateNotificationWindow(wxWindow* parent,
+        const wxString& title,
+        const wxString& slackChannel,
+        const wxString& sender,
+        const wxString& time,
+        const wxString& message,
+        int width,
+        int height,
+        int headerHeight);
     // Event handlers for dragging the borderless window
     void OnMouseDown(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);

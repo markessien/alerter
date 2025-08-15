@@ -14,13 +14,15 @@ const char* close_icon_base64 =
 
 
 
-NotificationWindow::NotificationWindow(wxWindow* parent,
-                                       const wxString& title,
-                                       const wxString& slackChannel,
-                                       const wxString& sender,
-                                       const wxString& time,
-                                       const wxString& message)
-    : wxFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxSTAY_ON_TOP)
+void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
+    const wxString& title,
+    const wxString& slackChannel,
+    const wxString& sender,
+    const wxString& time,
+    const wxString& message,
+    int width,
+    int height,
+    int headerHeight)
 {
     // --- Load Bitmaps from Files ---
     wxBitmap closeBitmap(wxT("images/close.png"), wxBITMAP_TYPE_PNG);
@@ -88,7 +90,7 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
 
     wxStaticText* messageText = new wxStaticText(textPanel, wxID_ANY, message);
     messageText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Segoe UI"));
-    messageText->Wrap(250);
+    messageText->Wrap(width - 80);
 
     textSizer->Add(channelText, 0, wxBOTTOM, 5);
     textSizer->Add(senderSizer, 0, wxBOTTOM, 5);
@@ -100,9 +102,10 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
     contentPanel->SetSizer(contentSizer);
 
     // --- Final Layout (Corrected) ---
-    mainSizer->Add(titleBarPanel, 0, wxEXPAND);
+    mainSizer->Add(titleBarPanel, 0, wxEXPAND | wxFIXED_MINSIZE);
+    titleBarPanel->SetMinSize(wxSize(-1, headerHeight));
     mainSizer->Add(contentPanel, 1, wxEXPAND);
-    
+
     // Set the sizer for the main panel that contains all the controls
     backgroundPanel->SetSizer(mainSizer);
 
@@ -110,9 +113,10 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
     wxBoxSizer* frameSizer = new wxBoxSizer(wxVERTICAL);
     // Add the main panel to the frame's sizer, making it expand to fill the frame
     frameSizer->Add(backgroundPanel, 1, wxEXPAND);
-    
+
     // Set the sizer for the frame and fit the frame to the sizer's content
     this->SetSizerAndFit(frameSizer);
+    this->SetClientSize(wxSize(width, height));
 
 
     // --- Bind Events ---
@@ -130,6 +134,17 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
     wxRect screenRect = wxGetClientDisplayRect();
     wxSize windowSize = GetSize();
     SetPosition(wxPoint(screenRect.width - windowSize.x - 20, screenRect.height - windowSize.y - 40));
+}
+
+NotificationWindow::NotificationWindow(wxWindow* parent,
+    const wxString& title,
+    const wxString& slackChannel,
+    const wxString& sender,
+    const wxString& time,
+    const wxString& message)
+    : wxFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxSTAY_ON_TOP)
+{
+    CreateNotificationWindow(parent, title, slackChannel, sender, time, message, 350, 120, 40);
 }
 
 
