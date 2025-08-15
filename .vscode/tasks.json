@@ -39,7 +39,8 @@
                 "uuid.lib",
                 "comctl32.lib",
                 "rpcrt4.lib",
-                "wininet.lib"
+                "wininet.lib",
+                "winmm.lib"
             ],
             "group": {
                 "kind": "build",

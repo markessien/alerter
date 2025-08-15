@@ -21,10 +21,20 @@ NotificationContentArea::NotificationContentArea(wxWindow* parent,
     wxBoxSizer* senderSizer = new wxBoxSizer(wxHORIZONTAL);
     wxStaticText* senderText = new wxStaticText(this, wxID_ANY, sender);
     senderText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "Segoe UI"));
+    
+
     wxStaticText* timeText = new wxStaticText(this, wxID_ANY, time);
     timeText->SetForegroundColour(wxColour(160, 160, 160));
     timeText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Segoe UI"));
+    
     senderSizer->Add(senderText, 0, wxALIGN_CENTER_VERTICAL);
+    if (!channel.IsEmpty())
+    {
+        wxStaticText* channelText = new wxStaticText(this, wxID_ANY, " in " + channel);
+        channelText->SetForegroundColour(wxColour(160, 160, 160));
+        channelText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Segoe UI"));
+        senderSizer->Add(channelText, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+    }
     senderSizer->AddStretchSpacer(1);
     senderSizer->Add(timeText, 0, wxALIGN_CENTER_VERTICAL);
 

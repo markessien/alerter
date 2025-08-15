@@ -6,6 +6,8 @@
 #include <wx/mstream.h>
 #include <wx/graphics.h>
 #include <wx/dcbuffer.h>
+#include <wx/sound.h>
+#include <wx/timer.h>
 #include "notifications.h"
 #include "notification_content_area.h"
 
@@ -22,11 +24,14 @@ private:
     void OnMouseUp(wxMouseEvent& event);
     void OnMouseCaptureLost(wxMouseCaptureLostEvent& event);
     void OnCloseButtonClick(wxCommandEvent& event);
+    void OnPlaybackTimer(wxTimerEvent& event);
 
     wxPoint m_delta;
     Notifications notifications;
     wxPanel* backgroundPanel;
     wxBoxSizer* mainSizer;
+    std::vector<NotificationContentArea*> m_contentAreas;
+    wxTimer* m_playbackTimer;
 };
 
 #endif // WINDOW_H

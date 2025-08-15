@@ -33,7 +33,7 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
 
     wxStaticBitmap* titleBarIcon = new wxStaticBitmap(titleBarPanel, wxID_ANY, titleBarBitmap);
 
-    wxStaticText* titleText = new wxStaticText(titleBarPanel, wxID_ANY, title);
+    wxStaticText* titleText = new wxStaticText(titleBarPanel, wxID_ANY, "TELEX");
     titleText->SetForegroundColour(*wxWHITE);
     titleText->SetFont(wxFont(12, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "Segoe UI"));
 
@@ -78,6 +78,8 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
     : wxFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxSTAY_ON_TOP)
 {
     CreateNotificationWindow(parent, title, 350, 40);
+    m_playbackTimer = new wxTimer(this, wxID_ANY);
+    Bind(wxEVT_TIMER, &NotificationWindow::OnPlaybackTimer, this);
 #ifdef __WXMSW__
     HWND hwnd = (HWND)this->GetHandle();
     LONG_PTR style = GetClassLongPtr(hwnd, GCL_STYLE);
@@ -87,6 +89,13 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
 
 void NotificationWindow::AddNotification(const wxString& channel, const wxString& sender, const wxString& time, const wxString& message)
 {
+    Freeze();
+
+    if (!IsShown())
+    {
+        Show();
+    }
+
     Notification notification;
     notification.channel = channel;
     notification.sender = sender;
@@ -95,22 +104,37 @@ void NotificationWindow::AddNotification(const wxString& channel, const wxString
     notification.shown = false;
     notifications.Add(notification);
 
+    // 1. Build the new content area without modifying the existing window
+    NotificationContentArea* contentArea = new NotificationContentArea(backgroundPanel, channel, sender, time, message, 350, 0, 0);
+    contentArea->SetSize(wxSize(350, contentArea->GetBestSize().y));
+    contentArea->Hide();
+
+    // 2. Add the new one to the window, but offscreen
+    wxSize contentSize = contentArea->GetSize();
+    contentArea->SetPosition(wxPoint(0, GetClientSize().y));
+
+    // 3. Resize the window first, then move existing notifications upwards
     wxPoint oldPos = GetPosition();
     wxSize oldSize = GetSize();
+    wxSize newSize(oldSize.x, oldSize.y + contentSize.y);
+    SetSize(newSize);
+    SetPosition(wxPoint(oldPos.x, oldPos.y - contentSize.y));
 
-    NotificationContentArea* contentArea = new NotificationContentArea(backgroundPanel, channel, sender, time, message, 350, 0, 0);
-    mainSizer->Add(contentArea, 1, wxEXPAND);
-    
-    this->Layout();
-    this->Fit();
-
-    wxSize newSize = GetSize();
-    int heightIncrease = newSize.GetHeight() - oldSize.GetHeight();
-
-    if (heightIncrease > 0)
+    int top = 40;
+    for (size_t i = 0; i < m_contentAreas.size(); ++i)
     {
-        SetPosition(wxPoint(oldPos.x, oldPos.y - heightIncrease));
+        m_contentAreas[i]->Move(0, top);
+        top += m_contentAreas[i]->GetSize().y;
     }
+
+    // 4. Slot the newest one into the bottom
+    contentArea->SetPosition(wxPoint(0, top));
+    contentArea->Show();
+    m_contentAreas.push_back(contentArea);
+
+    Thaw();
+
+    m_playbackTimer->StartOnce(1);
 }
 
 void NotificationWindow::OnMouseDown(wxMouseEvent& event)
@@ -129,6 +153,11 @@ void NotificationWindow::OnMouseMove(wxMouseEvent& event)
         wxPoint pos = ClientToScreen(event.GetPosition());
         SetPosition(pos - m_delta);
     }
+}
+
+void NotificationWindow::OnPlaybackTimer(wxTimerEvent& event)
+{
+    wxSound::Play(wxT("audio/knock.wav"), wxSOUND_ASYNC);
 }
 
 void NotificationWindow::OnMouseUp(wxMouseEvent& event)
