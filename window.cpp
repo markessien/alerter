@@ -2,21 +2,10 @@
 #include "icons.h"
 
 
-// A simple 24x24 white 'X' icon for the close button
-const char* close_icon_base64 =
-    "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlz"
-    "AAAAbwAAAG8B8aLcQwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAB5SURB"
-    "VEiJ7dYxCsAgEETR5t7/Y1sRBBWstA0N4uWwF8LCX8w548E/OPsCksAYoMEYsAFWYAnEwBqYgDmw"
-    "A1ZgBfKZAQ+gA1qgA/YlC56ADFiBDlgBf+0y8B+YtQO2YAlgwA4YgS0wA0OwBUZgB3YlC/4B5k0F"
-    "rMAb2IETsAIn4ApswBE4gS/4ADswA3fgBmzBGfiBTfgbcDc3wBdoAFf4Ayb0B2boD8zQH5ihPzBD"
-    "f2CG/sAM/YEp+gM06A/coD9wg/7ADfoDN+gP3KA/cIP+wA36Azdob8B+NE7x/wAvYk4a9QAAAABJ"
-    "RU5ErkJggg==";
-
-
 
 void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
     const wxString& title,
-    const wxString& slackChannel,
+    const wxString& channel,
     const wxString& sender,
     const wxString& time,
     const wxString& message,
@@ -24,12 +13,19 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
     int height,
     int headerHeight)
 {
+    // Todo, this is inefficient, we need to pre size these imeges
     // --- Load Bitmaps from Files ---
-    wxBitmap closeBitmap(wxT("images/close.png"), wxBITMAP_TYPE_PNG);
-    wxBitmap userBitmap(wxT("images/exclamation.png"), wxBITMAP_TYPE_PNG);
+    wxBitmap closeBitmap = wxBitmapBundle::FromSVGFile(wxT("images/x.svg"), wxSize(16, 16)).GetBitmap(wxDefaultSize);
+    wxImage alertUserImage(wxT("images/logo48.png"), wxBITMAP_TYPE_PNG);
+    // userImage.Rescale(64, 64);
+    wxBitmap alertUserBitmap(alertUserImage);
+
+    wxImage titleBarImage(wxT("images/small_logo28.png"), wxBITMAP_TYPE_PNG);
+    // logoVerySmallImage.Rescale(28, 28);
+    wxBitmap titleBarBitmap(titleBarImage);
 
     // --- Error Checking ---
-    if (!closeBitmap.IsOk() || !userBitmap.IsOk())
+    if (!closeBitmap.IsOk() || !alertUserBitmap.IsOk() || !titleBarBitmap.IsOk())
     {
         wxMessageBox(
             "Could not load image resources.\n"
@@ -47,59 +43,55 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
     wxPanel* titleBarPanel = new wxPanel(backgroundPanel);
-    titleBarPanel->SetBackgroundColour(wxColour(82, 38, 83));
+    titleBarPanel->SetBackgroundColour(wxColour(74, 55, 168));
     wxBoxSizer* titleBarSizer = new wxBoxSizer(wxHORIZONTAL);
 
     wxPanel* contentPanel = new wxPanel(backgroundPanel);
     contentPanel->SetBackgroundColour(*wxWHITE);
-    wxBoxSizer* contentSizer = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer* contentSizer = new wxBoxSizer(wxVERTICAL);
 
     // --- Populate Title Bar ---
-    wxStaticText* slackIcon = new wxStaticText(titleBarPanel, wxID_ANY, wxT("#"));
-    slackIcon->SetForegroundColour(*wxWHITE);
-    slackIcon->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    wxStaticBitmap* titleBarIcon = new wxStaticBitmap(titleBarPanel, wxID_ANY, titleBarBitmap);
 
     wxStaticText* titleText = new wxStaticText(titleBarPanel, wxID_ANY, title);
     titleText->SetForegroundColour(*wxWHITE);
     titleText->SetFont(wxFont(12, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "Segoe UI"));
 
     wxBitmapButton* closeButton = new wxBitmapButton(titleBarPanel, wxID_ANY, closeBitmap, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
-    closeButton->SetBackgroundColour(wxColour(82, 38, 83));
+    closeButton->SetBackgroundColour(wxColour(74, 55, 168));
 
-    titleBarSizer->Add(slackIcon, 0, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 10);
-    titleBarSizer->Add(titleText, 1, wxALIGN_CENTER_VERTICAL);
-    titleBarSizer->Add(closeButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+    titleBarSizer->Add(titleBarIcon, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 10);
+    titleBarSizer->Add(titleText, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+    titleBarSizer->Add(closeButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 16);
     titleBarPanel->SetSizer(titleBarSizer);
 
     // --- Populate Content Area ---
-    wxStaticBitmap* userIcon = new wxStaticBitmap(contentPanel, wxID_ANY, userBitmap);
-    wxPanel* textPanel = new wxPanel(contentPanel);
+    wxBoxSizer* contentBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+    wxStaticBitmap* alertUserIcon = new wxStaticBitmap(contentPanel, wxID_ANY, alertUserBitmap);
+
     wxBoxSizer* textSizer = new wxBoxSizer(wxVERTICAL);
 
-    wxStaticText* channelText = new wxStaticText(textPanel, wxID_ANY, slackChannel);
-    channelText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "Segoe UI"));
-
     wxBoxSizer* senderSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxStaticText* senderText = new wxStaticText(textPanel, wxID_ANY, sender);
+    wxStaticText* senderText = new wxStaticText(contentPanel, wxID_ANY, sender);
     senderText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "Segoe UI"));
-    wxStaticText* timeText = new wxStaticText(textPanel, wxID_ANY, time);
-    timeText->SetForegroundColour(*wxLIGHT_GREY);
+    wxStaticText* timeText = new wxStaticText(contentPanel, wxID_ANY, time);
+    timeText->SetForegroundColour(wxColour(160, 160, 160));
     timeText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Segoe UI"));
-    senderSizer->Add(senderText, 0, wxRIGHT, 5);
-    senderSizer->Add(timeText, 0);
+    senderSizer->Add(senderText, 0, wxALIGN_CENTER_VERTICAL);
+    senderSizer->AddStretchSpacer(1);
+    senderSizer->Add(timeText, 0, wxALIGN_CENTER_VERTICAL);
 
-    wxStaticText* messageText = new wxStaticText(textPanel, wxID_ANY, message);
-    messageText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Segoe UI"));
-    messageText->Wrap(width - 80);
+    wxStaticText* messageText = new wxStaticText(contentPanel, wxID_ANY, message);
+    messageText->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Segoe UI"));
+    messageText->Wrap(width - 80); // Adjust wrap width
 
-    textSizer->Add(channelText, 0, wxBOTTOM, 5);
-    textSizer->Add(senderSizer, 0, wxBOTTOM, 5);
-    textSizer->Add(messageText, 1, wxEXPAND);
-    textPanel->SetSizer(textSizer);
+    textSizer->Add(senderSizer, 0, wxEXPAND);
+    textSizer->Add(messageText, 1, wxEXPAND | wxTOP, 5);
 
-    contentSizer->Add(userIcon, 0, wxALL, 10);
-    contentSizer->Add(textPanel, 1, wxTOP | wxBOTTOM | wxRIGHT, 10);
-    contentPanel->SetSizer(contentSizer);
+    contentBoxSizer->Add(alertUserIcon, 0, wxALIGN_TOP | wxALL, 10);
+    contentBoxSizer->Add(textSizer, 1, wxEXPAND | wxTOP | wxBOTTOM | wxRIGHT, 10);
+
+    contentPanel->SetSizer(contentBoxSizer);
 
     // --- Final Layout (Corrected) ---
     mainSizer->Add(titleBarPanel, 0, wxEXPAND | wxFIXED_MINSIZE);
@@ -126,9 +118,9 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
     titleText->Bind(wxEVT_LEFT_DOWN, &NotificationWindow::OnMouseDown, this);
     titleText->Bind(wxEVT_LEFT_UP, &NotificationWindow::OnMouseUp, this);
     titleText->Bind(wxEVT_MOTION, &NotificationWindow::OnMouseMove, this);
-    slackIcon->Bind(wxEVT_LEFT_DOWN, &NotificationWindow::OnMouseDown, this);
-    slackIcon->Bind(wxEVT_LEFT_UP, &NotificationWindow::OnMouseUp, this);
-    slackIcon->Bind(wxEVT_MOTION, &NotificationWindow::OnMouseMove, this);
+    titleBarIcon->Bind(wxEVT_LEFT_DOWN, &NotificationWindow::OnMouseDown, this);
+    titleBarIcon->Bind(wxEVT_LEFT_UP, &NotificationWindow::OnMouseUp, this);
+    titleBarIcon->Bind(wxEVT_MOTION, &NotificationWindow::OnMouseMove, this);
     closeButton->Bind(wxEVT_BUTTON, &NotificationWindow::OnCloseButtonClick, this);
 
     wxRect screenRect = wxGetClientDisplayRect();
@@ -138,13 +130,13 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
 
 NotificationWindow::NotificationWindow(wxWindow* parent,
     const wxString& title,
-    const wxString& slackChannel,
+    const wxString& channel,
     const wxString& sender,
     const wxString& time,
     const wxString& message)
     : wxFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxSTAY_ON_TOP)
 {
-    CreateNotificationWindow(parent, title, slackChannel, sender, time, message, 350, 120, 40);
+    CreateNotificationWindow(parent, title, channel, sender, time, message, 350, 120, 40);
 }
 
 

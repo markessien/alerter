@@ -16,8 +16,8 @@ bool MyApp::OnInit()
     wxImage::AddHandler(new wxPNGHandler);
 
     NotificationWindow* frame = new NotificationWindow(NULL,
-                                                       "Alerter Inc",
-                                                       "#alertbot",
+                                                       "TELEX - #mychannel",
+                                                       "#mychannel",
                                                        "Alertbot",
                                                        "07:12",
                                                        "It works, funnily enough!");
