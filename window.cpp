@@ -1,56 +1,36 @@
 #include "window.h"
 #include "icons.h"
-
-
+#ifdef __WXMSW__
+#include <windows.h>
+#endif
 
 void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
     const wxString& title,
-    const wxString& channel,
-    const wxString& sender,
-    const wxString& time,
-    const wxString& message,
     int width,
-    int height,
     int headerHeight)
 {
-    // Todo, this is inefficient, we need to pre size these imeges
-    // --- Load Bitmaps from Files ---
     wxBitmap closeBitmap = wxBitmapBundle::FromSVGFile(wxT("images/x.svg"), wxSize(16, 16)).GetBitmap(wxDefaultSize);
-    wxImage alertUserImage(wxT("images/logo48.png"), wxBITMAP_TYPE_PNG);
-    // userImage.Rescale(64, 64);
-    wxBitmap alertUserBitmap(alertUserImage);
-
     wxImage titleBarImage(wxT("images/small_logo28.png"), wxBITMAP_TYPE_PNG);
-    // logoVerySmallImage.Rescale(28, 28);
     wxBitmap titleBarBitmap(titleBarImage);
 
-    // --- Error Checking ---
-    if (!closeBitmap.IsOk() || !alertUserBitmap.IsOk() || !titleBarBitmap.IsOk())
+    if (!closeBitmap.IsOk() || !titleBarBitmap.IsOk())
     {
         wxMessageBox(
             "Could not load image resources.\n"
             "Please make sure the icons exist in the folder.",
             "Error", wxOK | wxICON_ERROR);
-        // Destroy the frame cleanly and exit if images are missing
         wxPendingDelete.Append(this);
         return;
     }
 
-    // --- Create Panels and Sizers ---
-    // This is now the single main panel for the frame
-    wxPanel* backgroundPanel = new wxPanel(this);
+    backgroundPanel = new wxPanel(this);
     backgroundPanel->SetBackgroundColour(*wxWHITE);
-    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer = new wxBoxSizer(wxVERTICAL);
 
     wxPanel* titleBarPanel = new wxPanel(backgroundPanel);
     titleBarPanel->SetBackgroundColour(wxColour(74, 55, 168));
     wxBoxSizer* titleBarSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    wxPanel* contentPanel = new wxPanel(backgroundPanel);
-    contentPanel->SetBackgroundColour(*wxWHITE);
-    wxBoxSizer* contentSizer = new wxBoxSizer(wxVERTICAL);
-
-    // --- Populate Title Bar ---
     wxStaticBitmap* titleBarIcon = new wxStaticBitmap(titleBarPanel, wxID_ANY, titleBarBitmap);
 
     wxStaticText* titleText = new wxStaticText(titleBarPanel, wxID_ANY, title);
@@ -65,53 +45,17 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
     titleBarSizer->Add(closeButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 16);
     titleBarPanel->SetSizer(titleBarSizer);
 
-    // --- Populate Content Area ---
-    wxBoxSizer* contentBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxStaticBitmap* alertUserIcon = new wxStaticBitmap(contentPanel, wxID_ANY, alertUserBitmap);
-
-    wxBoxSizer* textSizer = new wxBoxSizer(wxVERTICAL);
-
-    wxBoxSizer* senderSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxStaticText* senderText = new wxStaticText(contentPanel, wxID_ANY, sender);
-    senderText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "Segoe UI"));
-    wxStaticText* timeText = new wxStaticText(contentPanel, wxID_ANY, time);
-    timeText->SetForegroundColour(wxColour(160, 160, 160));
-    timeText->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Segoe UI"));
-    senderSizer->Add(senderText, 0, wxALIGN_CENTER_VERTICAL);
-    senderSizer->AddStretchSpacer(1);
-    senderSizer->Add(timeText, 0, wxALIGN_CENTER_VERTICAL);
-
-    wxStaticText* messageText = new wxStaticText(contentPanel, wxID_ANY, message);
-    messageText->SetFont(wxFont(11, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Segoe UI"));
-    messageText->Wrap(width - 80); // Adjust wrap width
-
-    textSizer->Add(senderSizer, 0, wxEXPAND);
-    textSizer->Add(messageText, 1, wxEXPAND | wxTOP, 5);
-
-    contentBoxSizer->Add(alertUserIcon, 0, wxALIGN_TOP | wxALL, 10);
-    contentBoxSizer->Add(textSizer, 1, wxEXPAND | wxTOP | wxBOTTOM | wxRIGHT, 10);
-
-    contentPanel->SetSizer(contentBoxSizer);
-
-    // --- Final Layout (Corrected) ---
     mainSizer->Add(titleBarPanel, 0, wxEXPAND | wxFIXED_MINSIZE);
     titleBarPanel->SetMinSize(wxSize(-1, headerHeight));
-    mainSizer->Add(contentPanel, 1, wxEXPAND);
 
-    // Set the sizer for the main panel that contains all the controls
     backgroundPanel->SetSizer(mainSizer);
 
-    // Create a new sizer for the frame itself
     wxBoxSizer* frameSizer = new wxBoxSizer(wxVERTICAL);
-    // Add the main panel to the frame's sizer, making it expand to fill the frame
     frameSizer->Add(backgroundPanel, 1, wxEXPAND);
 
-    // Set the sizer for the frame and fit the frame to the sizer's content
     this->SetSizerAndFit(frameSizer);
-    this->SetClientSize(wxSize(width, height));
+    this->SetClientSize(wxSize(width, headerHeight));
 
-
-    // --- Bind Events ---
     titleBarPanel->Bind(wxEVT_LEFT_DOWN, &NotificationWindow::OnMouseDown, this);
     titleBarPanel->Bind(wxEVT_LEFT_UP, &NotificationWindow::OnMouseUp, this);
     titleBarPanel->Bind(wxEVT_MOTION, &NotificationWindow::OnMouseMove, this);
@@ -122,25 +66,52 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
     titleBarIcon->Bind(wxEVT_LEFT_UP, &NotificationWindow::OnMouseUp, this);
     titleBarIcon->Bind(wxEVT_MOTION, &NotificationWindow::OnMouseMove, this);
     closeButton->Bind(wxEVT_BUTTON, &NotificationWindow::OnCloseButtonClick, this);
+    this->Bind(wxEVT_MOUSE_CAPTURE_LOST, &NotificationWindow::OnMouseCaptureLost, this);
 
     wxRect screenRect = wxGetClientDisplayRect();
     wxSize windowSize = GetSize();
-    SetPosition(wxPoint(screenRect.width - windowSize.x - 20, screenRect.height - windowSize.y - 40));
+    SetPosition(wxPoint(screenRect.width - windowSize.x - 12, screenRect.height - windowSize.y - 12));
 }
 
 NotificationWindow::NotificationWindow(wxWindow* parent,
-    const wxString& title,
-    const wxString& channel,
-    const wxString& sender,
-    const wxString& time,
-    const wxString& message)
+    const wxString& title)
     : wxFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxSTAY_ON_TOP)
 {
-    CreateNotificationWindow(parent, title, channel, sender, time, message, 350, 120, 40);
+    CreateNotificationWindow(parent, title, 350, 40);
+#ifdef __WXMSW__
+    HWND hwnd = (HWND)this->GetHandle();
+    LONG_PTR style = GetClassLongPtr(hwnd, GCL_STYLE);
+    SetClassLongPtr(hwnd, GCL_STYLE, style | CS_DROPSHADOW);
+#endif
 }
 
+void NotificationWindow::AddNotification(const wxString& channel, const wxString& sender, const wxString& time, const wxString& message)
+{
+    Notification notification;
+    notification.channel = channel;
+    notification.sender = sender;
+    notification.time = time;
+    notification.message = message;
+    notification.shown = false;
+    notifications.Add(notification);
 
-// --- Event Handler Implementations ---
+    wxPoint oldPos = GetPosition();
+    wxSize oldSize = GetSize();
+
+    NotificationContentArea* contentArea = new NotificationContentArea(backgroundPanel, channel, sender, time, message, 350, 0, 0);
+    mainSizer->Add(contentArea, 1, wxEXPAND);
+    
+    this->Layout();
+    this->Fit();
+
+    wxSize newSize = GetSize();
+    int heightIncrease = newSize.GetHeight() - oldSize.GetHeight();
+
+    if (heightIncrease > 0)
+    {
+        SetPosition(wxPoint(oldPos.x, oldPos.y - heightIncrease));
+    }
+}
 
 void NotificationWindow::OnMouseDown(wxMouseEvent& event)
 {
@@ -152,7 +123,8 @@ void NotificationWindow::OnMouseDown(wxMouseEvent& event)
 
 void NotificationWindow::OnMouseMove(wxMouseEvent& event)
 {
-    if (event.Dragging() && event.LeftIsDown())
+    const wxMouseState mouseState = wxGetMouseState();
+    if (mouseState.LeftIsDown())
     {
         wxPoint pos = ClientToScreen(event.GetPosition());
         SetPosition(pos - m_delta);
@@ -170,4 +142,12 @@ void NotificationWindow::OnMouseUp(wxMouseEvent& event)
 void NotificationWindow::OnCloseButtonClick(wxCommandEvent& event)
 {
     Close(true);
+}
+
+void NotificationWindow::OnMouseCaptureLost(wxMouseCaptureLostEvent& event)
+{
+    if (HasCapture())
+    {
+        ReleaseMouse();
+    }
 }
