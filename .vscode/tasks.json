@@ -13,7 +13,7 @@
                 "/Fe:${workspaceFolder}\\build\\alerter.exe",
                 "/Fo:${workspaceFolder}\\build\\",
                 "/Fd:${workspaceFolder}\\build\\",
-                "${workspaceFolder}\\main.cpp",
+                "${workspaceFolder}\\*.cpp",
                 "/I", "${workspaceFolder}\\wxWidgets\\include",
                 "/I", "${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib\\mswu",
                 "/link",

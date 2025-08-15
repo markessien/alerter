@@ -1,0 +1,1 @@
+- make the app to be statically linked so it is a standalone exe
