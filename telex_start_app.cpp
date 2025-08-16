@@ -3,8 +3,6 @@
 #include "notification_timer.h"
 #include "messaging.h"
 
-Messaging* messaging = new Messaging();
-
 bool TelexStartApp::OnInit()
 {
     wxImage::AddHandler(new wxPNGHandler);
@@ -13,18 +11,19 @@ bool TelexStartApp::OnInit()
     m_frame = new NotificationWindow(NULL, "TELEX");
     m_timer = new NotificationTimer(m_frame);
     m_taskBarIcon = new TaskBarIcon(this);
+    m_messaging = new Messaging(m_frame);
 
-    if (messaging->Create() != wxTHREAD_NO_ERROR) {
+    if (m_messaging->Create() != wxTHREAD_NO_ERROR) {
         wxLogError("Could not create the messaging thread!");
-        delete messaging;
-        messaging = NULL;
+        delete m_messaging;
+        m_messaging = NULL;
         return false;
     }
 
-    if (messaging->Run() != wxTHREAD_NO_ERROR) {
+    if (m_messaging->Run() != wxTHREAD_NO_ERROR) {
         wxLogError("Could not run the messaging thread!");
-        delete messaging;
-        messaging = NULL;
+        delete m_messaging;
+        m_messaging = NULL;
         return false;
     }
 
@@ -34,6 +33,11 @@ bool TelexStartApp::OnInit()
 int TelexStartApp::OnExit()
 {
     delete m_taskBarIcon;
+    if (m_messaging)
+    {
+        m_messaging->Delete();
+        m_messaging = NULL;
+    }
     return wxApp::OnExit();
 }
 

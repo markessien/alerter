@@ -1,5 +1,6 @@
 #include "notification_window.h"
-#include "icons.h"
+#include "icon.h"
+#include "messaging.h"
 #ifdef __WXMSW__
 #include <windows.h>
 #endif
@@ -83,6 +84,7 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
     Bind(wxEVT_TIMER, &NotificationWindow::OnPlaybackTimer, this, ID_PlaybackTimer);
     Bind(wxEVT_TIMER, &NotificationWindow::OnNotificationTimer, this, ID_NotificationTimer);
     Bind(wxEVT_CLOSE_WINDOW, &NotificationWindow::OnClose, this);
+    Bind(wxEVT_COMMAND_MYTHREAD_NOTIFICATION, &NotificationWindow::OnNotification, this);
     m_notificationTimer->Start(1000);
 #ifdef __WXMSW__
     HWND hwnd = (HWND)this->GetHandle();
@@ -212,6 +214,16 @@ void NotificationWindow::OnMouseUp(wxMouseEvent& event)
     {
         ReleaseMouse();
     }
+}
+
+void NotificationWindow::OnNotification(wxThreadEvent& event)
+{
+    wxVector<wxString> payload = event.GetPayload<wxVector<wxString>>();
+    wxString message = payload[0];
+    wxString sender = payload[1];
+    wxString channel = payload[2];
+    wxString iconPath = payload[3];
+    AddNotification(channel, sender, "time", message);
 }
 
 void NotificationWindow::OnCloseButtonClick(wxCommandEvent& event)

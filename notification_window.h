@@ -27,6 +27,7 @@ private:
     void OnPlaybackTimer(wxTimerEvent& event);
     void OnNotificationTimer(wxTimerEvent& event);
     void OnClose(wxCloseEvent& event);
+    void OnNotification(wxThreadEvent& event);
 
     wxPoint m_delta;
     NotificationManager notifications;

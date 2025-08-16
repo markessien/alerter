@@ -1,6 +1,7 @@
 #include "task_bar_icon.h"
 #include "telex_start_app.h"
 #include <wx/app.h>
+#include <wx/filefn.h>
 #ifdef __WXMSW__
 #include <windows.h>
 #include <shellapi.h>
@@ -70,7 +71,12 @@ void TaskBarIcon::OnMenuOpenMainApp(wxCommandEvent&)
     si.cb = sizeof(si);
     ZeroMemory(&m_processInformation, sizeof(m_processInformation));
 
-    wxString command = "D:\\Code\\Alerter\\apps\\flutter-test-app\\alerter_test_app\\build\\windows\\x64\\runner\\Debug\\alerter_test_app.exe";
+    wxString command = ".\\apps\\flutter-test-app\\alerter_test_app\\build\\windows\\x64\\runner\\Debug\\alerter_test_app.exe";
+    if (!wxFileExists(command))
+    {
+        command = "telex.exe";
+    }
+
     if (!CreateProcess(NULL, command.wchar_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &m_processInformation))
     {
         wxLogError("Could not start main app.");

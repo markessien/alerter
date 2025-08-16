@@ -5,6 +5,7 @@
 #include "notification_timer.h"
 
 class TaskBarIcon; // Forward declaration
+class Messaging; // Forward declaration
 
 class TelexStartApp : public wxApp
 {
@@ -18,4 +19,5 @@ private:
     NotificationWindow* m_frame;
     NotificationTimer* m_timer;
     TaskBarIcon* m_taskBarIcon;
+    Messaging* m_messaging;
 };
