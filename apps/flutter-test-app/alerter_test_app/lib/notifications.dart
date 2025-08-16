@@ -2,27 +2,30 @@ import 'dart:io';
 import 'dart:convert';
 
 class Notifications {
-  final String _pipeName = r'\\.\pipe\telex-notifications';
+  final String _pipeName = r'\\?\pipe\telex-notifications';
   RandomAccessFile? _pipe;
   bool _isPipeOpen = false;
+  final Function(String)? _logger;
 
-  Notifications() {
+  Notifications({Function(String)? logger}) : _logger = logger {
     _initPipe();
   }
 
   Future<void> _initPipe() async {
     try {
+      _log('Initializing pipe...');
       var file = File(_pipeName);
       // The other process is responsible for creating the pipe.
       // This class is a client that writes to it.
-      if (await file.exists()) {
+      try {
         _pipe = await file.open(mode: FileMode.writeOnlyAppend);
         _isPipeOpen = true;
-      } else {
-        print('Pipe $_pipeName does not exist. Waiting for it to be created.');
+        _log('Pipe opened successfully.');
+      } on FileSystemException {
+        _log('Pipe $_pipeName does not exist. Waiting for it to be created.');
       }
     } catch (e) {
-      print('Error opening pipe: $e');
+      _log('Error initializing pipe: $e');
       _isPipeOpen = false;
     }
   }
@@ -34,10 +37,10 @@ class Notifications {
     required String iconPath,
   }) async {
     if (!_isPipeOpen || _pipe == null) {
-      // Try to reopen the pipe
+      _log('Pipe not open. Attempting to reconnect...');
       await _initPipe();
       if (!_isPipeOpen || _pipe == null) {
-        print('Cannot send notification, pipe is not open.');
+        _log('Cannot send notification, pipe is not open.');
         return;
       }
     }
@@ -53,10 +56,12 @@ class Notifications {
     final bytes = utf8.encode(jsonString + '\n');
 
     try {
+      _log('Sending data: $jsonString');
       await _pipe!.writeFrom(bytes);
       await _pipe!.flush();
+      _log('Data sent successfully.');
     } catch (e) {
-      print('Error writing to pipe: $e');
+      _log('Error writing to pipe: $e');
       _isPipeOpen = false; // Pipe might be broken
     }
   }
@@ -65,6 +70,11 @@ class Notifications {
     if (_isPipeOpen) {
       await _pipe?.close();
       _isPipeOpen = false;
+      _log('Pipe closed.');
     }
+  }
+
+  void _log(String message) {
+    _logger?.call(message);
   }
 }

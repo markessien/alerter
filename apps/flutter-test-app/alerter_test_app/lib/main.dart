@@ -17,7 +17,20 @@ class _MainAppState extends State<MainApp> {
   String? _selectedChannelImage;
   final TextEditingController _channelNameController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
-  final Notifications _notifications = Notifications();
+  late final Notifications _notifications;
+  final List<String> _logMessages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _notifications = Notifications(logger: _log);
+  }
+
+  void _log(String message) {
+    setState(() {
+      _logMessages.insert(0, message);
+    });
+  }
 
   @override
   void dispose() {
@@ -74,7 +87,24 @@ class _MainAppState extends State<MainApp> {
                   });
                 },
               ),
-              const Spacer(),
+              const SizedBox(height: 20),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: ListView.builder(
+                    reverse: true,
+                    itemCount: _logMessages.length,
+                    itemBuilder: (context, index) {
+                      return Text(_logMessages[index]);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_userNameController.text.isNotEmpty &&
