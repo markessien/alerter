@@ -5,13 +5,13 @@
             "name": "Launch Alerter (Debug)",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/alerter.exe",
+            "program": "${workspaceFolder}/build/telexstart.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "internalConsole",
-            "preLaunchTask": "Build wxWidgets App (MSVC)"
+            "preLaunchTask": "Build TelexStart - Release"
         }
     ]
 }

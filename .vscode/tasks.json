@@ -2,15 +2,29 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build wxWidgets App (MSVC)",
+            "label": "Compile Resources",
+            "type": "shell",
+            "command": "rc.exe",
+            "args": [
+                "/fo",
+                "${workspaceFolder}\\build\\icon.res",
+                "${workspaceFolder}\\icon.rc"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Build TelexStart - Release",
             "type": "shell",
             "command": "cl.exe",
+            "dependsOn": "Compile Resources",
             "args": [
                 "/EHsc",
-                "/MD",
+                "/MT",
+                "/D", "WXUSING_LIBS",
+                "/D", "__WXMSW__",
                 "/std:c++17",
-                "/Zi",
-                "/Fe:${workspaceFolder}\\build\\alerter.exe",
+                "/O2",
+                "/Fe:${workspaceFolder}\\build\\telexstart.exe",
                 "/Fo:${workspaceFolder}\\build\\",
                 "/Fd:${workspaceFolder}\\build\\",
                 "${workspaceFolder}\\*.cpp",
@@ -19,7 +33,9 @@
                 "/link",
                 "/LIBPATH:${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib",
                 // wxWidgets Libraries
-                "wxmsw32u.lib",
+                "wxmsw32u_adv.lib",     // For advanced features like wxInitAllImageHandlers
+                "wxmsw32u_core.lib",    // For GUI controls, sizers, windows
+                "wxbase32u.lib",        // For base classes like wxString
                 "wxpng.lib",
                 "wxjpeg.lib",
                 "wxtiff.lib",
@@ -40,7 +56,8 @@
                 "comctl32.lib",
                 "rpcrt4.lib",
                 "wininet.lib",
-                "winmm.lib"
+                "winmm.lib",
+                "${workspaceFolder}\\build\\icon.res"
             ],
             "group": {
                 "kind": "build",
