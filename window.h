@@ -35,6 +35,12 @@ private:
     std::vector<NotificationContentArea*> m_contentAreas;
     wxTimer* m_playbackTimer;
     wxTimer* m_notificationTimer;
+
+    enum
+    {
+        ID_PlaybackTimer = wxID_HIGHEST + 1,
+        ID_NotificationTimer
+    };
 };
 
 #endif // WINDOW_H

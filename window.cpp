@@ -75,13 +75,13 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
 
 NotificationWindow::NotificationWindow(wxWindow* parent,
     const wxString& title)
-    : wxFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxSTAY_ON_TOP)
+    : wxFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxSTAY_ON_TOP | wxFRAME_NO_TASKBAR)
 {
     CreateNotificationWindow(parent, title, 350, 40);
-    m_playbackTimer = new wxTimer(this, wxID_ANY);
-    m_notificationTimer = new wxTimer(this, wxID_ANY);
-    Bind(wxEVT_TIMER, &NotificationWindow::OnPlaybackTimer, this);
-    Bind(wxEVT_TIMER, &NotificationWindow::OnNotificationTimer, this);
+    m_playbackTimer = new wxTimer(this, ID_PlaybackTimer);
+    m_notificationTimer = new wxTimer(this, ID_NotificationTimer);
+    Bind(wxEVT_TIMER, &NotificationWindow::OnPlaybackTimer, this, ID_PlaybackTimer);
+    Bind(wxEVT_TIMER, &NotificationWindow::OnNotificationTimer, this, ID_NotificationTimer);
     Bind(wxEVT_CLOSE_WINDOW, &NotificationWindow::OnClose, this);
     m_notificationTimer->Start(1000);
 #ifdef __WXMSW__
