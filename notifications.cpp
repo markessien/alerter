@@ -2,13 +2,13 @@
 
 #include <algorithm>
 
-void Notifications::Add(Notification notification)
+void NotificationManager::Add(Notification notification)
 {
     notification.creationTime = wxDateTime::Now();
     notifications.push_back(notification);
 }
 
-void Notifications::RemoveOld()
+void NotificationManager::RemoveOld()
 {
     if (!notifications.empty())
     {

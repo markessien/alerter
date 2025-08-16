@@ -1,6 +1,6 @@
-#include "notification_content_area.h"
+#include "notification_content.h"
 
-NotificationContentArea::NotificationContentArea(wxWindow* parent,
+NotificationContent::NotificationContent(wxWindow* parent,
     const wxString& channel,
     const wxString& sender,
     const wxString& time,

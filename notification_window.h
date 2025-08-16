@@ -1,5 +1,5 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef NOTIFICATION_WINDOW_H
+#define NOTIFICATION_WINDOW_H
 
 #include <wx/wx.h>
 #include <wx/statline.h>
@@ -9,7 +9,7 @@
 #include <wx/sound.h>
 #include <wx/timer.h>
 #include "notifications.h"
-#include "notification_content_area.h"
+#include "notification_content.h"
 
 class NotificationWindow : public wxFrame
 {
@@ -29,10 +29,10 @@ private:
     void OnClose(wxCloseEvent& event);
 
     wxPoint m_delta;
-    Notifications notifications;
+    NotificationManager notifications;
     wxPanel* backgroundPanel;
     wxBoxSizer* mainSizer;
-    std::vector<NotificationContentArea*> m_contentAreas;
+    std::vector<NotificationContent*> m_contentAreas;
     wxTimer* m_playbackTimer;
     wxTimer* m_notificationTimer;
 
@@ -43,4 +43,4 @@ private:
     };
 };
 
-#endif // WINDOW_H
+#endif // NOTIFICATION_WINDOW_H

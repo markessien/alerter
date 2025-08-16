@@ -1,4 +1,4 @@
-#include "window.h"
+#include "notification_window.h"
 #include "icons.h"
 #ifdef __WXMSW__
 #include <windows.h>
@@ -109,7 +109,7 @@ void NotificationWindow::AddNotification(const wxString& channel, const wxString
     notifications.Add(notification);
 
     // 1. Build the new content area without modifying the existing window
-    NotificationContentArea* contentArea = new NotificationContentArea(backgroundPanel, channel, sender, time, message, 350, 0, 0);
+    NotificationContent* contentArea = new NotificationContent(backgroundPanel, channel, sender, time, message, 350, 0, 0);
     contentArea->SetSize(wxSize(350, contentArea->GetBestSize().y));
     contentArea->Hide();
 
@@ -180,7 +180,7 @@ void NotificationWindow::OnNotificationTimer(wxTimerEvent& event)
 
     Freeze();
 
-    NotificationContentArea* topArea = m_contentAreas.front();
+    NotificationContent* topArea = m_contentAreas.front();
     int topHeight = topArea->GetSize().y;
     topArea->Destroy();
     m_contentAreas.erase(m_contentAreas.begin());

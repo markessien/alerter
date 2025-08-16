@@ -17,7 +17,7 @@ public:
     wxDateTime creationTime;
 };
 
-class Notifications
+class NotificationManager
 {
 public:
     std::vector<Notification> notifications;

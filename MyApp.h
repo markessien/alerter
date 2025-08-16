@@ -1,10 +1,10 @@
 #pragma once
 
 #include <wx/wx.h>
-#include "window.h"
+#include "notification_window.h"
+#include "notification_timer.h"
 
-class MyTaskBarIcon; // Forward declaration
-class NotificationTimer;
+class TaskBarIcon; // Forward declaration
 
 class MyApp : public wxApp
 {
@@ -17,17 +17,5 @@ public:
 private:
     NotificationWindow* m_frame;
     NotificationTimer* m_timer;
-    MyTaskBarIcon* m_taskBarIcon;
-};
-
-class NotificationTimer : public wxTimer
-{
-public:
-    NotificationTimer(NotificationWindow* frame);
-    void Notify();
-    void Start();
-
-private:
-    NotificationWindow* m_frame;
-    int m_count;
+    TaskBarIcon* m_taskBarIcon;
 };

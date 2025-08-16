@@ -1,12 +1,12 @@
-#ifndef NOTIFICATION_CONTENT_AREA_H
-#define NOTIFICATION_CONTENT_AREA_H
+#ifndef NOTIFICATION_CONTENT_H
+#define NOTIFICATION_CONTENT_H
 
 #include <wx/wx.h>
 
-class NotificationContentArea : public wxPanel
+class NotificationContent : public wxPanel
 {
 public:
-    NotificationContentArea(wxWindow* parent,
+    NotificationContent(wxWindow* parent,
         const wxString& channel,
         const wxString& sender,
         const wxString& time,
@@ -16,4 +16,4 @@ public:
         int left);
 };
 
-#endif // NOTIFICATION_CONTENT_AREA_H
+#endif // NOTIFICATION_CONTENT_H

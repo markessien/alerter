@@ -5,10 +5,10 @@
 
 class MyApp;
 
-class MyTaskBarIcon : public wxTaskBarIcon
+class TaskBarIcon : public wxTaskBarIcon
 {
 public:
-    MyTaskBarIcon(MyApp* app);
+    TaskBarIcon(MyApp* app);
     virtual wxMenu *CreatePopupMenu();
 
 private:
