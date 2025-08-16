@@ -15,7 +15,7 @@ class NotificationWindow : public wxFrame
 {
 public:
     NotificationWindow(wxWindow* parent, const wxString& title);
-    void AddNotification(const wxString& channel, const wxString& sender, const wxString& time, const wxString& message);
+    void AddNotification(const wxString& channel, const wxString& sender, const wxString& time, const wxString& message, const wxString& iconPath);
 
 private:
     void CreateNotificationWindow(wxWindow* parent, const wxString& title, int width, int headerHeight);

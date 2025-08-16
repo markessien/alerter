@@ -15,8 +15,15 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   String? _selectedDmImage;
   String? _selectedChannelImage;
-  final TextEditingController _channelNameController = TextEditingController();
-  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _channelNameController = TextEditingController(
+    text: 'Default Channel',
+  );
+  final TextEditingController _userNameController = TextEditingController(
+    text: 'Default User',
+  );
+  final TextEditingController _messageController = TextEditingController(
+    text: 'Default message',
+  );
   late final Notifications _notifications;
   final List<String> _logMessages = [];
 
@@ -36,6 +43,7 @@ class _MainAppState extends State<MainApp> {
   void dispose() {
     _channelNameController.dispose();
     _userNameController.dispose();
+    _messageController.dispose();
     _notifications.close();
     super.dispose();
   }
@@ -45,97 +53,120 @@ class _MainAppState extends State<MainApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Notification Sender')),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: _userNameController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'User Name',
+        body: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      controller: _userNameController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'User Name',
+                        fillColor: Colors.white,
+                        filled: true,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _channelNameController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Channel Name',
+                        fillColor: Colors.white,
+                        filled: true,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _messageController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Message',
+                        fillColor: Colors.white,
+                        filled: true,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildImageRow(
+                      title: 'Send DM',
+                      images: ['elephant.png', 'frog.png', 'lion.png'],
+                      selectedImage: _selectedDmImage,
+                      onImageSelected: (image) {
+                        setState(() {
+                          _selectedDmImage = image;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    _buildImageRow(
+                      title: 'Send Channel Message',
+                      images: ['medal.png', 'ping-pong.png', 'shoe.png'],
+                      selectedImage: _selectedChannelImage,
+                      onImageSelected: (image) {
+                        setState(() {
+                          _selectedChannelImage = image;
+                        });
+                      },
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_userNameController.text.isNotEmpty &&
+                            _selectedDmImage != null) {
+                          _notifications.send(
+                            message: _messageController.text,
+                            senderName: _userNameController.text,
+                            channel: 'DM',
+                            iconPath: 'assets/images/$_selectedDmImage',
+                            type: 'DM',
+                          );
+                        }
+                      },
+                      child: const Text('Send DM'),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_channelNameController.text.isNotEmpty &&
+                            _selectedChannelImage != null) {
+                          _notifications.send(
+                            message: _messageController.text,
+                            senderName: _userNameController.text,
+                            channel: _channelNameController.text,
+                            iconPath: 'assets/images/$_selectedChannelImage',
+                            type: 'channel',
+                          );
+                        }
+                      },
+                      child: const Text('Send Channel Message'),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _channelNameController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Channel Name',
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildImageRow(
-                title: 'Send DM',
-                images: ['elephant.png', 'frog.png', 'lion.png'],
-                selectedImage: _selectedDmImage,
-                onImageSelected: (image) {
-                  setState(() {
-                    _selectedDmImage = image;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              _buildImageRow(
-                title: 'Send Channel Message',
-                images: ['medal.png', 'ping-pong.png', 'shoe.png'],
-                selectedImage: _selectedChannelImage,
-                onImageSelected: (image) {
-                  setState(() {
-                    _selectedChannelImage = image;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: ListView.builder(
-                    reverse: true,
-                    itemCount: _logMessages.length,
-                    itemBuilder: (context, index) {
-                      return Text(_logMessages[index]);
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_userNameController.text.isNotEmpty &&
-                      _selectedDmImage != null) {
-                    _notifications.send(
-                      message: 'This is a direct message',
-                      senderName: _userNameController.text,
-                      channel: 'DM',
-                      iconPath: 'assets/images/$_selectedDmImage',
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(
+                color: Colors.black,
+                padding: const EdgeInsets.all(8.0),
+                child: ListView.builder(
+                  reverse: true,
+                  itemCount: _logMessages.length,
+                  itemBuilder: (context, index) {
+                    return Text(
+                      _logMessages[index],
+                      style: const TextStyle(color: Colors.white),
                     );
-                  }
-                },
-                child: const Text('Send DM'),
+                  },
+                ),
               ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  if (_channelNameController.text.isNotEmpty &&
-                      _selectedChannelImage != null) {
-                    _notifications.send(
-                      message: 'This is a channel message',
-                      senderName: _userNameController.text,
-                      channel: _channelNameController.text,
-                      iconPath: 'assets/images/$_selectedChannelImage',
-                    );
-                  }
-                },
-                child: const Text('Send Channel Message'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -16,7 +16,6 @@ enum
 };
 
 wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
-    EVT_MENU(ID_TRAY_SHOW_NOTIFICATIONS, TaskBarIcon::OnMenuShowNotifications)
     EVT_MENU(ID_TRAY_OPEN_MAIN_APP, TaskBarIcon::OnMenuOpenMainApp)
     EVT_MENU(ID_TRAY_CLOSE_MAIN_APP, TaskBarIcon::OnMenuCloseMainApp)
     EVT_MENU(ID_TRAY_EXIT, TaskBarIcon::OnMenuExit)
@@ -39,17 +38,11 @@ TaskBarIcon::TaskBarIcon(TelexStartApp* app) : m_app(app)
 wxMenu* TaskBarIcon::CreatePopupMenu()
 {
     wxMenu *menu = new wxMenu;
-    menu->Append(ID_TRAY_SHOW_NOTIFICATIONS, wxT("Show Notifications"));
     menu->Append(ID_TRAY_OPEN_MAIN_APP, wxT("Open Main App"));
     menu->Append(ID_TRAY_CLOSE_MAIN_APP, wxT("Close Main App"));
     menu->AppendSeparator();
     menu->Append(ID_TRAY_EXIT, wxT("Exit"));
     return menu;
-}
-
-void TaskBarIcon::OnMenuShowNotifications(wxCommandEvent&)
-{
-    m_app->StartNotifications();
 }
 
 void TaskBarIcon::OnMenuOpenMainApp(wxCommandEvent&)

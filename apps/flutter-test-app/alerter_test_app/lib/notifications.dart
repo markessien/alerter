@@ -12,21 +12,23 @@ class Notifications {
   }
 
   Future<void> _initPipe() async {
+    // Clean up previous pipe instance if it exists
+    if (_pipe != null) {
+      await _pipe!.close();
+      _pipe = null;
+    }
+    _isPipeOpen = false;
+
     try {
       _log('Initializing pipe...');
       var file = File(_pipeName);
-      // The other process is responsible for creating the pipe.
-      // This class is a client that writes to it.
-      try {
-        _pipe = await file.open(mode: FileMode.writeOnlyAppend);
-        _isPipeOpen = true;
-        _log('Pipe opened successfully.');
-      } on FileSystemException {
-        _log('Pipe $_pipeName does not exist. Waiting for it to be created.');
-      }
+      _pipe = await file.open(mode: FileMode.writeOnlyAppend);
+      _isPipeOpen = true;
+      _log('Pipe opened successfully.');
+    } on FileSystemException {
+      _log('Pipe $_pipeName does not exist. Waiting for it to be created.');
     } catch (e) {
       _log('Error initializing pipe: $e');
-      _isPipeOpen = false;
     }
   }
 
@@ -35,6 +37,7 @@ class Notifications {
     required String senderName,
     required String channel,
     required String iconPath,
+    required String type,
   }) async {
     if (!_isPipeOpen || _pipe == null) {
       _log('Pipe not open. Attempting to reconnect...');
@@ -50,6 +53,8 @@ class Notifications {
       'senderName': senderName,
       'channel': channel,
       'iconPath': iconPath,
+      'timestamp': DateTime.now().toIso8601String(),
+      'type': type,
     };
 
     final jsonString = jsonEncode(notificationData);
@@ -60,9 +65,21 @@ class Notifications {
       await _pipe!.writeFrom(bytes);
       await _pipe!.flush();
       _log('Data sent successfully.');
+    } on FileSystemException catch (e) {
+      // Error code 233: No process is on the other end of the pipe.
+      if (e.osError?.errorCode == 233) {
+        _log('Notification service not running. Could not send notification.');
+      } else {
+        _log('Error writing to pipe: $e');
+      }
+      _isPipeOpen = false;
+      await _pipe?.close();
+      _pipe = null;
     } catch (e) {
-      _log('Error writing to pipe: $e');
-      _isPipeOpen = false; // Pipe might be broken
+      _log('Unexpected error writing to pipe: $e');
+      _isPipeOpen = false;
+      await _pipe?.close();
+      _pipe = null;
     }
   }
 

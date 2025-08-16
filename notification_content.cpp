@@ -5,6 +5,7 @@ NotificationContent::NotificationContent(wxWindow* parent,
     const wxString& sender,
     const wxString& time,
     const wxString& message,
+    const wxString& iconPath,
     int width,
     int top,
     int left)
@@ -12,7 +13,16 @@ NotificationContent::NotificationContent(wxWindow* parent,
 {
     SetBackgroundColour(*wxWHITE);
     wxBoxSizer* contentBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxImage alertUserImage(wxT("images/logo48.png"), wxBITMAP_TYPE_PNG);
+    wxImage alertUserImage;
+    if (wxFileExists(iconPath))
+    {
+        alertUserImage.LoadFile(iconPath, wxBITMAP_TYPE_ANY);
+    }
+    else
+    {
+        alertUserImage.LoadFile(wxT("images/logo48.png"), wxBITMAP_TYPE_PNG);
+    }
+    alertUserImage.Rescale(48, 48);
     wxBitmap alertUserBitmap(alertUserImage);
     wxStaticBitmap* alertUserIcon = new wxStaticBitmap(this, wxID_ANY, alertUserBitmap);
 

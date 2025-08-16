@@ -93,7 +93,7 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
 #endif
 }
 
-void NotificationWindow::AddNotification(const wxString& channel, const wxString& sender, const wxString& time, const wxString& message)
+void NotificationWindow::AddNotification(const wxString& channel, const wxString& sender, const wxString& time, const wxString& message, const wxString& iconPath)
 {
     Freeze();
 
@@ -111,7 +111,7 @@ void NotificationWindow::AddNotification(const wxString& channel, const wxString
     notifications.Add(notification);
 
     // 1. Build the new content area without modifying the existing window
-    NotificationContent* contentArea = new NotificationContent(backgroundPanel, channel, sender, time, message, 350, 0, 0);
+    NotificationContent* contentArea = new NotificationContent(backgroundPanel, channel, sender, time, message, iconPath, 350, 0, 0);
     contentArea->SetSize(wxSize(350, contentArea->GetBestSize().y));
     contentArea->Hide();
 
@@ -223,7 +223,14 @@ void NotificationWindow::OnNotification(wxThreadEvent& event)
     wxString sender = payload[1];
     wxString channel = payload[2];
     wxString iconPath = payload[3];
-    AddNotification(channel, sender, "time", message);
+    wxString timestamp = payload[4];
+    wxString type = payload[5];
+
+    wxDateTime dt;
+    dt.ParseISOCombined(timestamp, 'T');
+    wxString time = dt.FormatTime();
+
+    AddNotification(channel, sender, time, message, iconPath);
 }
 
 void NotificationWindow::OnCloseButtonClick(wxCommandEvent& event)

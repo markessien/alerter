@@ -41,14 +41,6 @@ int TelexStartApp::OnExit()
     return wxApp::OnExit();
 }
 
-void TelexStartApp::StartNotifications()
-{
-    if (m_timer)
-    {
-        m_timer->Start();
-    }
-}
-
 void TelexStartApp::ShowWindow()
 {
     if (m_frame)

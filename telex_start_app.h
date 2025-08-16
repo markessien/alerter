@@ -12,7 +12,6 @@ class TelexStartApp : public wxApp
 public:
     virtual bool OnInit();
     virtual int OnExit();
-    void StartNotifications();
     void ShowWindow();
 
 private:

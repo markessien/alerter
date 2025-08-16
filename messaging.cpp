@@ -1,6 +1,7 @@
 #include <wx/wx.h>
 #include "messaging.h"
 #include "include/json.hpp"
+#include "logger.h"
 
 using json = nlohmann::json;
 
@@ -24,7 +25,7 @@ wxThread::ExitCode Messaging::Entry() {
     );
 
     if (hPipe == INVALID_HANDLE_VALUE) {
-        wxMessageBox("Failed to create named pipe", "Error", wxOK | wxICON_ERROR);
+        LogMessage("Failed to create named pipe");
         return (wxThread::ExitCode)0;
     }
 
@@ -50,19 +51,23 @@ wxThread::ExitCode Messaging::Entry() {
                     wxString senderName = j["senderName"].get<std::string>();
                     wxString channel = j["channel"].get<std::string>();
                     wxString iconPath = j["iconPath"].get<std::string>();
+                    wxString timestamp = j["timestamp"].get<std::string>();
+                    wxString type = j["type"].get<std::string>();
 
                     wxVector<wxString> payload;
                     payload.push_back(message);
                     payload.push_back(senderName);
                     payload.push_back(channel);
                     payload.push_back(iconPath);
+                    payload.push_back(timestamp);
+                    payload.push_back(type);
 
                     wxThreadEvent* event = new wxThreadEvent(wxEVT_COMMAND_MYTHREAD_NOTIFICATION);
                     event->SetPayload(payload);
                     wxQueueEvent(m_pParent, event);
                 }
-                catch (json::parse_error& e) {
-                    wxLogError("JSON parsing error: %s", e.what());
+                catch (const json::exception& e) {
+                    LogMessage(wxString::Format("JSON error: %s", e.what()));
                 }
             }
         }

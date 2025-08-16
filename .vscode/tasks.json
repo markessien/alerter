@@ -13,29 +13,35 @@
             "group": "build"
         },
         {
-            "label": "Build TelexStart - Release",
+            // NEW DEBUG BUILD TASK
+            "label": "Build TelexStart - Debug",
             "type": "shell",
             "command": "cl.exe",
             "dependsOn": "Compile Resources",
             "args": [
                 "/EHsc",
-                "/MT",
+                "/MTd", // Use debug runtime library
+                "/Zi",  // Generate debug information
+                "/Od",  // Disable optimizations
                 "/D", "WXUSING_LIBS",
                 "/D", "__WXMSW__",
+                "/D", "WXDEBUG", // Often used in wxWidgets for debug builds
                 "/std:c++17",
-                "/O2",
-                "/Fe:${workspaceFolder}\\build\\telexstart.exe",
+                "/Fe:${workspaceFolder}\\build\\telexstart_d.exe", // Debug executable name
                 "/Fo:${workspaceFolder}\\build\\",
                 "/Fd:${workspaceFolder}\\build\\",
                 "${workspaceFolder}\\*.cpp",
+                "/I", "${workspaceFolder}\\include",
                 "/I", "${workspaceFolder}\\wxWidgets\\include",
-                "/I", "${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib\\mswu",
+                // Use debug version of wxWidgets headers
+                "/I", "${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib\\mswu", 
                 "/link",
+                "/DEBUG", // Tell linker to include debug info
                 "/LIBPATH:${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib",
-                // wxWidgets Libraries
-                "wxmsw32u_adv.lib",     // For advanced features like wxInitAllImageHandlers
-                "wxmsw32u_core.lib",    // For GUI controls, sizers, windows
-                "wxbase32u.lib",        // For base classes like wxString
+                // wxWidgets Debug Libraries (note the 'd' suffix)
+                "wxmsw32u_adv.lib",
+                "wxmsw32u_core.lib",
+                "wxbase32u.lib",
                 "wxpng.lib",
                 "wxjpeg.lib",
                 "wxtiff.lib",
@@ -43,26 +49,42 @@
                 "wxregexu.lib",
                 "wxexpat.lib",
                 // Windows System Libraries
-                "kernel32.lib",
-                "user32.lib",
-                "gdi32.lib",
-                "winspool.lib",
-                "comdlg32.lib",
-                "advapi32.lib",
-                "shell32.lib",
-                "ole32.lib",
-                "oleaut32.lib",
-                "uuid.lib",
-                "comctl32.lib",
-                "rpcrt4.lib",
-                "wininet.lib",
-                "winmm.lib",
+                "kernel32.lib", "user32.lib", "gdi32.lib", "winspool.lib", 
+                "comdlg32.lib", "advapi32.lib", "shell32.lib", "ole32.lib",
+                "oleaut32.lib", "uuid.lib", "comctl32.lib", "rpcrt4.lib",
+                "wininet.lib", "winmm.lib",
                 "${workspaceFolder}\\build\\icon.res"
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": true // Make this the default build (Ctrl+Shift+B)
             },
+            "presentation": { "reveal": "always" },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            // ORIGINAL RELEASE BUILD TASK
+            "label": "Build TelexStart - Release",
+            "type": "shell",
+            "command": "cl.exe",
+            "dependsOn": "Compile Resources",
+            "args": [
+                "/EHsc", "/MT", "/D", "WXUSING_LIBS", "/D", "__WXMSW__", 
+                "/std:c++17", "/O2", "/Fe:${workspaceFolder}\\build\\telexstart.exe",
+                "/Fo:${workspaceFolder}\\build\\", "/Fd:${workspaceFolder}\\build\\",
+                "${workspaceFolder}\\*.cpp", "/I", "${workspaceFolder}\\include",
+                "/I", "${workspaceFolder}\\wxWidgets\\include",
+                "/I", "${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib\\mswu",
+                "/link", "/LIBPATH:${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib",
+                "wxmsw32u_adv.lib", "wxmsw32u_core.lib", "wxbase32u.lib", 
+                "wxpng.lib", "wxjpeg.lib", "wxtiff.lib", "wxzlib.lib", 
+                "wxregexu.lib", "wxexpat.lib", "kernel32.lib", "user32.lib", 
+                "gdi32.lib", "winspool.lib", "comdlg32.lib", "advapi32.lib", 
+                "shell32.lib", "ole32.lib", "oleaut32.lib", "uuid.lib", 
+                "comctl32.lib", "rpcrt4.lib", "wininet.lib", "winmm.lib",
+                "${workspaceFolder}\\build\\icon.res"
+            ],
+            "group": "build",
             "presentation": { "reveal": "always" },
             "problemMatcher": "$msCompile"
         }

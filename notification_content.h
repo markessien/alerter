@@ -11,6 +11,7 @@ public:
         const wxString& sender,
         const wxString& time,
         const wxString& message,
+        const wxString& iconPath,
         int width,
         int top,
         int left);
