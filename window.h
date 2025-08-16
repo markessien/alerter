@@ -25,6 +25,8 @@ private:
     void OnMouseCaptureLost(wxMouseCaptureLostEvent& event);
     void OnCloseButtonClick(wxCommandEvent& event);
     void OnPlaybackTimer(wxTimerEvent& event);
+    void OnNotificationTimer(wxTimerEvent& event);
+    void OnClose(wxCloseEvent& event);
 
     wxPoint m_delta;
     Notifications notifications;
@@ -32,6 +34,7 @@ private:
     wxBoxSizer* mainSizer;
     std::vector<NotificationContentArea*> m_contentAreas;
     wxTimer* m_playbackTimer;
+    wxTimer* m_notificationTimer;
 };
 
 #endif // WINDOW_H

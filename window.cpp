@@ -79,7 +79,11 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
 {
     CreateNotificationWindow(parent, title, 350, 40);
     m_playbackTimer = new wxTimer(this, wxID_ANY);
+    m_notificationTimer = new wxTimer(this, wxID_ANY);
     Bind(wxEVT_TIMER, &NotificationWindow::OnPlaybackTimer, this);
+    Bind(wxEVT_TIMER, &NotificationWindow::OnNotificationTimer, this);
+    Bind(wxEVT_CLOSE_WINDOW, &NotificationWindow::OnClose, this);
+    m_notificationTimer->Start(1000);
 #ifdef __WXMSW__
     HWND hwnd = (HWND)this->GetHandle();
     LONG_PTR style = GetClassLongPtr(hwnd, GCL_STYLE);
@@ -160,6 +164,48 @@ void NotificationWindow::OnPlaybackTimer(wxTimerEvent& event)
     wxSound::Play(wxT("audio/knock.wav"), wxSOUND_ASYNC);
 }
 
+void NotificationWindow::OnNotificationTimer(wxTimerEvent& event)
+{
+    if (m_contentAreas.empty())
+    {
+        return;
+    }
+
+    int old_notification_count = notifications.notifications.size();
+    notifications.RemoveOld();
+    if (notifications.notifications.size() == old_notification_count)
+    {
+        return;
+    }
+
+    Freeze();
+
+    NotificationContentArea* topArea = m_contentAreas.front();
+    int topHeight = topArea->GetSize().y;
+    topArea->Destroy();
+    m_contentAreas.erase(m_contentAreas.begin());
+
+    int top = 40;
+    for (auto& area : m_contentAreas)
+    {
+        area->Move(0, top);
+        top += area->GetSize().y;
+    }
+
+    wxPoint oldPos = GetPosition();
+    wxSize oldSize = GetSize();
+    wxSize newSize(oldSize.x, oldSize.y - topHeight);
+    SetSize(newSize);
+    SetPosition(wxPoint(oldPos.x, oldPos.y + topHeight));
+
+    Thaw();
+
+    if (m_contentAreas.empty())
+    {
+        this->Hide();
+    }
+}
+
 void NotificationWindow::OnMouseUp(wxMouseEvent& event)
 {
     if (HasCapture())
@@ -170,7 +216,12 @@ void NotificationWindow::OnMouseUp(wxMouseEvent& event)
 
 void NotificationWindow::OnCloseButtonClick(wxCommandEvent& event)
 {
-    Close(true);
+    this->Hide();
+}
+
+void NotificationWindow::OnClose(wxCloseEvent& event)
+{
+    this->Hide();
 }
 
 void NotificationWindow::OnMouseCaptureLost(wxMouseCaptureLostEvent& event)

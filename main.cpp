@@ -1,37 +1,40 @@
-#include <wx/wx.h>
-#include <wx/display.h>
-#include "window.h"
-
-class NotificationTimer : public wxTimer
-{
-public:
-    NotificationTimer(NotificationWindow* frame);
-    void Notify();
-    void Start();
-
-private:
-    NotificationWindow* m_frame;
-    int m_count;
-};
-
-class MyApp : public wxApp
-{
-public:
-    virtual bool OnInit();
-};
+#include "MyApp.h"
+#include "TrayIcon.h"
 
 wxIMPLEMENT_APP(MyApp);
 
 bool MyApp::OnInit()
 {
     wxImage::AddHandler(new wxPNGHandler);
+    wxImage::AddHandler(new wxICOHandler);
 
-    NotificationWindow* frame = new NotificationWindow(NULL, "TELEX");
-
-    NotificationTimer* timer = new NotificationTimer(frame);
-    timer->Start();
+    m_frame = new NotificationWindow(NULL, "TELEX");
+    m_timer = new NotificationTimer(m_frame);
+    m_taskBarIcon = new MyTaskBarIcon(this);
 
     return true;
+}
+
+int MyApp::OnExit()
+{
+    delete m_taskBarIcon;
+    return wxApp::OnExit();
+}
+
+void MyApp::StartNotifications()
+{
+    if (m_timer)
+    {
+        m_timer->Start();
+    }
+}
+
+void MyApp::ShowWindow()
+{
+    if (m_frame)
+    {
+        m_frame->Show();
+    }
 }
 
 NotificationTimer::NotificationTimer(NotificationWindow* frame)
@@ -41,6 +44,7 @@ NotificationTimer::NotificationTimer(NotificationWindow* frame)
 
 void NotificationTimer::Start()
 {
+    m_count = 0;
     wxTimer::Start(2000); // 2-second interval
 }
 

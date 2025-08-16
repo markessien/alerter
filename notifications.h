@@ -2,6 +2,7 @@
 #define NOTIFICATIONS_H
 
 #include <wx/wx.h>
+#include <wx/datetime.h>
 #include <vector>
 
 class Notification
@@ -13,6 +14,7 @@ public:
     wxString time;
     wxString message;
     bool shown;
+    wxDateTime creationTime;
 };
 
 class Notifications
@@ -20,6 +22,7 @@ class Notifications
 public:
     std::vector<Notification> notifications;
     void Add(Notification notification);
+    void RemoveOld();
 };
 
 #endif // NOTIFICATIONS_H
