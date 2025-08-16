@@ -1,5 +1,5 @@
 #include "task_bar_icon.h"
-#include "MyApp.h"
+#include "telex_start_app.h"
 #include <wx/app.h>
 #ifdef __WXMSW__
 #include <windows.h>
@@ -21,7 +21,7 @@ wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
     EVT_MENU(ID_TRAY_EXIT, TaskBarIcon::OnMenuExit)
 wxEND_EVENT_TABLE()
 
-TaskBarIcon::TaskBarIcon(MyApp* app) : m_app(app)
+TaskBarIcon::TaskBarIcon(TelexStartApp* app) : m_app(app)
 {
 #ifdef __WXMSW__
     ZeroMemory(&m_processInformation, sizeof(m_processInformation));

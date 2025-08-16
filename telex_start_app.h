@@ -6,7 +6,7 @@
 
 class TaskBarIcon; // Forward declaration
 
-class MyApp : public wxApp
+class TelexStartApp : public wxApp
 {
 public:
     virtual bool OnInit();
