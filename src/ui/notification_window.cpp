@@ -10,8 +10,8 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
     int width,
     int headerHeight)
 {
-    wxBitmap closeBitmap = wxBitmapBundle::FromSVGFile(wxT("images/x.svg"), wxSize(16, 16)).GetBitmap(wxDefaultSize);
-    wxImage titleBarImage(wxT("images/small_logo28.png"), wxBITMAP_TYPE_PNG);
+    wxBitmap closeBitmap = wxBitmapBundle::FromSVGFile(wxT("res/images/x.svg"), wxSize(16, 16)).GetBitmap(wxDefaultSize);
+    wxImage titleBarImage(wxT("res/images/small_logo28.png"), wxBITMAP_TYPE_PNG);
     wxBitmap titleBarBitmap(titleBarImage);
 
     if (!closeBitmap.IsOk() || !titleBarBitmap.IsOk())

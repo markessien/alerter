@@ -5,8 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${vcpkgRoot}/x64-windows/include",
-                "${workspaceFolder}/wxWidgets/include",
-                "${workspaceFolder}/wxWidgets/lib/vc_x64_lib/mswu",
+                "${workspaceFolder}/third_party/wxWidgets/include",
+                "${workspaceFolder}/third_party/wxWidgets/lib/vc_x64_lib/mswu",
                 "${workspaceFolder}/include"
             ],
             "defines": [

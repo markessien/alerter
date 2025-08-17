@@ -20,7 +20,7 @@ NotificationContent::NotificationContent(wxWindow* parent,
     }
     else
     {
-        alertUserImage.LoadFile(wxT("images/logo48.png"), wxBITMAP_TYPE_PNG);
+        alertUserImage.LoadFile(wxT("res/images/logo48.png"), wxBITMAP_TYPE_PNG);
     }
     alertUserImage.Rescale(48, 48);
     wxBitmap alertUserBitmap(alertUserImage);

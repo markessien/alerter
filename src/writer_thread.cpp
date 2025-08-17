@@ -2,7 +2,7 @@
 #include "writer_thread.h"
 #include "logger.h"
 #include "telex_protocol.h"
-#include "include/json.hpp"
+#include <json.hpp>
 #include "pipe.h"
 
 using json = nlohmann::json;

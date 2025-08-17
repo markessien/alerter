@@ -8,12 +8,11 @@
             "args": [
                 "/fo",
                 "${workspaceFolder}\\build\\icon.res",
-                "${workspaceFolder}\\icon.rc"
+                "${workspaceFolder}\\res\\icon.rc"
             ],
             "group": "build"
         },
         {
-            // CORRECTED DEBUG BUILD TASK
             "label": "Build TelexStart - Debug",
             "type": "shell",
             "command": "cl.exe",
@@ -30,15 +29,16 @@
                 "/Fe:${workspaceFolder}\\build\\telexstart_d.exe", // Debug executable name
                 "/Fo:${workspaceFolder}\\build\\",
                 "/Fd:${workspaceFolder}\\build\\",
-                "${workspaceFolder}\\*.cpp",
+                "${workspaceFolder}\\src\\*.cpp",
+                "${workspaceFolder}\\src\\ui\\*.cpp",
                 "/I", "${workspaceFolder}\\include",
-                "/I", "${workspaceFolder}\\wxWidgets\\include",
-                // CORRECTED: Use debug version of wxWidgets headers
-                "/I", "${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib\\mswud", 
+                "/I", "${workspaceFolder}\\third_party",
+                "/I", "${workspaceFolder}\\res",
+                "/I", "${workspaceFolder}\\third_party\\wxWidgets\\include",
+                "/I", "${workspaceFolder}\\third_party\\wxWidgets\\lib\\vc_x64_lib\\mswud", 
                 "/link",
                 "/DEBUG", // Tell linker to include debug info
-                "/LIBPATH:${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib",
-                // CORRECTED: wxWidgets Debug Libraries (note the 'd' suffix)
+                "/LIBPATH:${workspaceFolder}\\third_party\\wxWidgets\\lib\\vc_x64_lib",                
                 "wxmsw32ud_adv.lib",
                 "wxmsw32ud_core.lib",
                 "wxbase32ud.lib",
@@ -63,7 +63,6 @@
             "problemMatcher": "$msCompile"
         },
         {
-            // ORIGINAL RELEASE BUILD TASK
             "label": "Build TelexStart - Release",
             "type": "shell",
             "command": "cl.exe",

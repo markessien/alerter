@@ -26,10 +26,10 @@ TaskBarIcon::TaskBarIcon(TelexStartApp* app) : m_app(app)
 #ifdef __WXMSW__
     ZeroMemory(&m_processInformation, sizeof(m_processInformation));
 #endif
-    wxIcon icon(wxT("images/logo64.ico"), wxBITMAP_TYPE_ICO);
+    wxIcon icon(wxT("res/images/logo64.ico"), wxBITMAP_TYPE_ICO);
     if (!icon.IsOk())
     {
-        wxLogError(wxT("Could not load icon 'images/logo64.ico'."));
+        wxLogError(wxT("Could not load icon 'res/images/logo64.ico'."));
         return;
     }
     SetIcon(icon, wxT("Alerter"));

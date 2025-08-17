@@ -1,3 +1,0 @@
-#include "icon.h"
-
-APP_ICON ICON "images/logo64.ico"
