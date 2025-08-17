@@ -2,3 +2,4 @@ wxWidgets
 build
 *.exe
 *.obj
+*.log

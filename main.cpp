@@ -1,6 +1,5 @@
 #include "telex_start_app.h"
 #include "task_bar_icon.h"
-#include "notification_timer.h"
 #include "messaging.h"
 
 

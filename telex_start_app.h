@@ -2,7 +2,7 @@
 
 #include <wx/wx.h>
 #include "notification_window.h"
-#include "notification_timer.h"
+#include <wx/snglinst.h>
 
 class TaskBarIcon; // Forward declaration
 class Messaging; // Forward declaration
@@ -13,10 +13,11 @@ public:
     virtual bool OnInit();
     virtual int OnExit();
     void ShowWindow();
+    void OnActivateAnotherInstance();
 
 private:
     NotificationWindow* m_frame;
-    NotificationTimer* m_timer;
     TaskBarIcon* m_taskBarIcon;
     Messaging* m_messaging;
+    wxSingleInstanceChecker* m_checker;
 };

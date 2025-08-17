@@ -228,7 +228,7 @@ void NotificationWindow::OnNotification(wxThreadEvent& event)
 
     wxDateTime dt;
     dt.ParseISOCombined(timestamp, 'T');
-    wxString time = dt.FormatTime();
+    wxString time = dt.Format("%H:%M");
 
     AddNotification(channel, sender, time, message, iconPath);
 }

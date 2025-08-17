@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 import 'package:alerter_test_app/notifications.dart';
 import 'package:flutter/material.dart';
 
@@ -115,14 +118,17 @@ class _MainAppState extends State<MainApp> {
                     ),
                     const Spacer(),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_userNameController.text.isNotEmpty &&
                             _selectedDmImage != null) {
+                          final absolutePath = await _getAbsoluteImagePath(
+                            'assets/images/$_selectedDmImage',
+                          );
                           _notifications.send({
                             'message': _messageController.text,
                             'senderName': _userNameController.text,
                             'channel': 'DM',
-                            'iconPath': 'assets/images/$_selectedDmImage',
+                            'iconPath': absolutePath,
                             'type': 'DM',
                             'timestamp': DateTime.now().toIso8601String(),
                           });
@@ -132,14 +138,17 @@ class _MainAppState extends State<MainApp> {
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_channelNameController.text.isNotEmpty &&
                             _selectedChannelImage != null) {
+                          final absolutePath = await _getAbsoluteImagePath(
+                            'assets/images/$_selectedChannelImage',
+                          );
                           _notifications.send({
                             'message': _messageController.text,
                             'senderName': _userNameController.text,
                             'channel': _channelNameController.text,
-                            'iconPath': 'assets/images/$_selectedChannelImage',
+                            'iconPath': absolutePath,
                             'type': 'channel',
                             'timestamp': DateTime.now().toIso8601String(),
                           });
@@ -226,5 +235,17 @@ class _MainAppState extends State<MainApp> {
         ),
       ),
     );
+  }
+
+  Future<String> _getAbsoluteImagePath(String assetPath) async {
+    final byteData = await rootBundle.load(assetPath);
+    final buffer = byteData.buffer;
+    final tempDir = await getTemporaryDirectory();
+    final fileName = assetPath.split('/').last;
+    final file = File('${tempDir.path}/$fileName');
+    await file.writeAsBytes(
+      buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+    );
+    return file.path;
   }
 }
