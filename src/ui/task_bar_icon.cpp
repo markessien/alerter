@@ -64,7 +64,7 @@ void TaskBarIcon::OnMenuOpenMainApp(wxCommandEvent&)
     si.cb = sizeof(si);
     ZeroMemory(&m_processInformation, sizeof(m_processInformation));
 
-    wxString command = ".\\apps\\flutter-test-app\\alerter_test_app\\build\\windows\\x64\\runner\\Debug\\alerter_test_app.exe";
+    wxString command = ".\\testing\\flutter-test-app\\alerter_test_app\\build\\windows\\x64\\runner\\Debug\\alerter_test_app.exe";
     if (!wxFileExists(command))
     {
         command = "telex.exe";

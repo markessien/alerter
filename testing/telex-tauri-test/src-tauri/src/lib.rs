@@ -1,3 +1,7 @@
+mod notification_client;
+mod pipe_client;
+use tauri_plugin_dialog::DialogExt;
+
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -5,19 +9,29 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn show_message_box() {
-    rfd::MessageDialog::new()
-        .set_title("Hello from Tauri")
-        .set_description("This is a native message box")
-        .set_buttons(rfd::MessageButtons::Ok)
-        .show();
+fn send_telex_notification(app: tauri::AppHandle, sender: &str, message: &str) {
+
+    // hardco. Set sender and mssage
+    let sender = if sender.is_empty() { "Unknown" } else { sender };
+    let message = if message.is_empty() { "No message provided" } else { message };
+    
+    let msg = format!("Message from {}: {}", sender, message);
+    app.dialog()
+        .message(msg)
+        .title("Telex Notification")
+        .show(|_| {});
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, show_message_box])
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            send_telex_notification,
+            notification_client::send_notification_to_pipe
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

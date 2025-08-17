@@ -12,8 +12,35 @@ function App() {
     setGreetMsg(await invoke("greet", { name }));
   }
 
-  async function showMessageBox() {
-    await invoke("show_message_box");
+  async function sendNotification() {
+    console.log("Sending notification...");
+    try {
+      await invoke("send_telex_notification", {
+        sender: "React",
+        message: "Hello from React!",
+      });
+      console.log("Notification sent successfully.");
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
+  }
+
+  async function sendNotificationToPipe() {
+    console.log("Sending notification to pipe...");
+    try {
+      await invoke("send_notification_to_pipe", {
+        payload: {
+          message: "Hello from React via named pipe!",
+          sender_name: "React Pipe Client",
+          channel: "Pipe",
+          icon_path: "path/to/icon.png",
+          timestamp: new Date().toISOString(),
+        },
+      });
+      console.log("Notification sent successfully to pipe.");
+    } catch (error) {
+      console.error("Error sending notification to pipe:", error);
+    }
   }
 
   return (
@@ -50,7 +77,8 @@ function App() {
       <p>{greetMsg}</p>
 
       <div className="row">
-        <button onClick={showMessageBox}>Show Message Box</button>
+        <button onClick={sendNotification}>Send Notification</button>
+        <button onClick={sendNotificationToPipe}>Send Notification to Pipe</button>
       </div>
     </main>
   );
