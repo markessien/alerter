@@ -1,81 +1,49 @@
-#include <wx/wx.h>
 #include "messaging.h"
-#include "include/json.hpp"
 #include "logger.h"
-
-using json = nlohmann::json;
 
 wxDEFINE_EVENT(wxEVT_COMMAND_MYTHREAD_NOTIFICATION, wxThreadEvent);
 
-Messaging::Messaging(wxEvtHandler* pParent) : wxThread(wxTHREAD_DETACHED), m_pParent(pParent) {}
+Messaging::Messaging(wxEvtHandler* pParent)
+    : m_pParent(pParent), m_readerThread(nullptr), m_writerThread(nullptr) {}
 
-wxThread::ExitCode Messaging::Entry() {
-    // Allow the main app to initialize
-    wxSleep(2);
+Messaging::~Messaging() {
+    Stop();
+}
 
-    HANDLE hPipe = CreateNamedPipe(
-        TEXT("\\\\.\\pipe\\telex-notifications"),
-        PIPE_ACCESS_INBOUND,
-        PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
-        1, // nMaxInstances
-        1024 * 16, // nOutBufferSize
-        1024 * 16, // nInBufferSize
-        NMPWAIT_USE_DEFAULT_WAIT, // nDefaultTimeOut
-        NULL // lpSecurityAttributes
-    );
+void Messaging::Start() {
+    m_readerThread = new ReaderThread(m_pParent, m_responseQueue);
+    m_writerThread = new WriterThread(m_responseQueue);
 
-    if (hPipe == INVALID_HANDLE_VALUE) {
-        LogMessage("Failed to create named pipe");
-        return (wxThread::ExitCode)0;
+    if (m_readerThread->Run() != wxTHREAD_NO_ERROR || m_writerThread->Run() != wxTHREAD_NO_ERROR) {
+        LogMessage("Failed to start messaging threads.");
+        delete m_readerThread;
+        delete m_writerThread;
+        m_readerThread = nullptr;
+        m_writerThread = nullptr;
+    }
+}
+
+void Messaging::Stop() {
+    // Signal the writer thread to shut down
+    if (m_writerThread) {
+        m_responseQueue.Post("shutdown");
     }
 
-    while (!TestDestroy()) {
-        // Wait for the client to connect; if it succeeds,
-        // the function returns a nonzero value. If the function
-        // returns zero, GetLastError returns ERROR_PIPE_CONNECTED.
-        bool connected = ConnectNamedPipe(hPipe, NULL) ?
-            true : (GetLastError() == ERROR_PIPE_CONNECTED);
-
-        if (connected) {
-            char buffer[1024];
-            DWORD dwRead;
-            // Read client requests from the pipe.
-            if (ReadFile(hPipe, buffer, sizeof(buffer) - 1, &dwRead, NULL)) {
-                buffer[dwRead] = '\0';
-                std::string stdString = std::string(buffer);
-
-                try {
-                    json j = json::parse(stdString);
-
-                    wxString message = j["message"].get<std::string>();
-                    wxString senderName = j["senderName"].get<std::string>();
-                    wxString channel = j["channel"].get<std::string>();
-                    wxString iconPath = j["iconPath"].get<std::string>();
-                    wxString timestamp = j["timestamp"].get<std::string>();
-                    wxString type = j["type"].get<std::string>();
-
-                    wxVector<wxString> payload;
-                    payload.push_back(message);
-                    payload.push_back(senderName);
-                    payload.push_back(channel);
-                    payload.push_back(iconPath);
-                    payload.push_back(timestamp);
-                    payload.push_back(type);
-
-                    wxThreadEvent* event = new wxThreadEvent(wxEVT_COMMAND_MYTHREAD_NOTIFICATION);
-                    event->SetPayload(payload);
-                    wxQueueEvent(m_pParent, event);
-                }
-                catch (const json::exception& e) {
-                    LogMessage(wxString::Format("JSON error: %s", e.what()));
-                }
-            }
+    // Wait for the reader thread to terminate
+    if (m_readerThread) {
+        if (m_readerThread->IsRunning()) {
+            m_readerThread->Wait();
         }
-
-        // Disconnect the pipe to allow another client to connect.
-        DisconnectNamedPipe(hPipe);
+        delete m_readerThread;
+        m_readerThread = nullptr;
     }
 
-    CloseHandle(hPipe);
-    return (wxThread::ExitCode)0;
+    // Wait for the writer thread to terminate
+    if (m_writerThread) {
+        if (m_writerThread->IsRunning()) {
+            m_writerThread->Wait();
+        }
+        delete m_writerThread;
+        m_writerThread = nullptr;
+    }
 }

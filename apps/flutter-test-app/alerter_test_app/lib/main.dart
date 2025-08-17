@@ -118,13 +118,14 @@ class _MainAppState extends State<MainApp> {
                       onPressed: () {
                         if (_userNameController.text.isNotEmpty &&
                             _selectedDmImage != null) {
-                          _notifications.send(
-                            message: _messageController.text,
-                            senderName: _userNameController.text,
-                            channel: 'DM',
-                            iconPath: 'assets/images/$_selectedDmImage',
-                            type: 'DM',
-                          );
+                          _notifications.send({
+                            'message': _messageController.text,
+                            'senderName': _userNameController.text,
+                            'channel': 'DM',
+                            'iconPath': 'assets/images/$_selectedDmImage',
+                            'type': 'DM',
+                            'timestamp': DateTime.now().toIso8601String(),
+                          });
                         }
                       },
                       child: const Text('Send DM'),
@@ -134,13 +135,14 @@ class _MainAppState extends State<MainApp> {
                       onPressed: () {
                         if (_channelNameController.text.isNotEmpty &&
                             _selectedChannelImage != null) {
-                          _notifications.send(
-                            message: _messageController.text,
-                            senderName: _userNameController.text,
-                            channel: _channelNameController.text,
-                            iconPath: 'assets/images/$_selectedChannelImage',
-                            type: 'channel',
-                          );
+                          _notifications.send({
+                            'message': _messageController.text,
+                            'senderName': _userNameController.text,
+                            'channel': _channelNameController.text,
+                            'iconPath': 'assets/images/$_selectedChannelImage',
+                            'type': 'channel',
+                            'timestamp': DateTime.now().toIso8601String(),
+                          });
                         }
                       },
                       child: const Text('Send Channel Message'),

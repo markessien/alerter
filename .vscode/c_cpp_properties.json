@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "${vcpkgRoot}/x64-windows/include",
                 "${workspaceFolder}/wxWidgets/include",
-                "${workspaceFolder}/wxWidgets/lib/vc_x64_lib/mswu"
+                "${workspaceFolder}/wxWidgets/lib/vc_x64_lib/mswu",
+                "${workspaceFolder}/include"
             ],
             "defines": [
                 "_DEBUG",

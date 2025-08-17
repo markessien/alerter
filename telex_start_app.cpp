@@ -13,19 +13,7 @@ bool TelexStartApp::OnInit()
     m_taskBarIcon = new TaskBarIcon(this);
     m_messaging = new Messaging(m_frame);
 
-    if (m_messaging->Create() != wxTHREAD_NO_ERROR) {
-        wxLogError("Could not create the messaging thread!");
-        delete m_messaging;
-        m_messaging = NULL;
-        return false;
-    }
-
-    if (m_messaging->Run() != wxTHREAD_NO_ERROR) {
-        wxLogError("Could not run the messaging thread!");
-        delete m_messaging;
-        m_messaging = NULL;
-        return false;
-    }
+    m_messaging->Start();
 
     return true;
 }
@@ -35,7 +23,8 @@ int TelexStartApp::OnExit()
     delete m_taskBarIcon;
     if (m_messaging)
     {
-        m_messaging->Delete();
+        m_messaging->Stop();
+        delete m_messaging;
         m_messaging = NULL;
     }
     return wxApp::OnExit();
@@ -48,4 +37,3 @@ void TelexStartApp::ShowWindow()
         m_frame->Show();
     }
 }
-

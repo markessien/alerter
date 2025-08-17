@@ -24,5 +24,5 @@ Take note - we compile it statically.
 - Open 64 Native Tools Command Prompt for VS
 - Navigate to \TelexStart\wxWidgets\build\msw>
 - Clean any previous build with nmake -f makefile.vc clean BUILD=release
-- Run nmake on it in this way nmake -f makefile.vc RUNTIME_LIBS=static SHARED=0 MONOLITHIC=0 BUILD=release TARGET_CPU=X64. This creates a release version that is statically linked. This will take a while to build.
+- Run nmake on it in this way nmake -f makefile.vc RUNTIME_LIBS=static SHARED=0 MONOLITHIC=0 BUILD=release TARGET_CPU=X64. This creates a release version that is statically linked. This will take a while to build. Build the debug version too with nmake -f makefile.vc RUNTIME_LIBS=static SHARED=0 MONOLITHIC=0 BUILD=debug TARGET_CPU=X64. you need the debug version for step through debugging. 
 - Once done, all the libs for linking will be in \lib\vc_x64_lib. Take note that this is referenced in tasks.json

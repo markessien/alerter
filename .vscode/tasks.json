@@ -13,7 +13,7 @@
             "group": "build"
         },
         {
-            // NEW DEBUG BUILD TASK
+            // CORRECTED DEBUG BUILD TASK
             "label": "Build TelexStart - Debug",
             "type": "shell",
             "command": "cl.exe",
@@ -33,21 +33,21 @@
                 "${workspaceFolder}\\*.cpp",
                 "/I", "${workspaceFolder}\\include",
                 "/I", "${workspaceFolder}\\wxWidgets\\include",
-                // Use debug version of wxWidgets headers
-                "/I", "${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib\\mswu", 
+                // CORRECTED: Use debug version of wxWidgets headers
+                "/I", "${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib\\mswud", 
                 "/link",
                 "/DEBUG", // Tell linker to include debug info
                 "/LIBPATH:${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib",
-                // wxWidgets Debug Libraries (note the 'd' suffix)
-                "wxmsw32u_adv.lib",
-                "wxmsw32u_core.lib",
-                "wxbase32u.lib",
-                "wxpng.lib",
-                "wxjpeg.lib",
-                "wxtiff.lib",
-                "wxzlib.lib",
-                "wxregexu.lib",
-                "wxexpat.lib",
+                // CORRECTED: wxWidgets Debug Libraries (note the 'd' suffix)
+                "wxmsw32ud_adv.lib",
+                "wxmsw32ud_core.lib",
+                "wxbase32ud.lib",
+                "wxpngd.lib",
+                "wxjpegd.lib",
+                "wxtiffd.lib",
+                "wxzlibd.lib",
+                "wxregexud.lib",
+                "wxexpatd.lib",
                 // Windows System Libraries
                 "kernel32.lib", "user32.lib", "gdi32.lib", "winspool.lib", 
                 "comdlg32.lib", "advapi32.lib", "shell32.lib", "ole32.lib",
