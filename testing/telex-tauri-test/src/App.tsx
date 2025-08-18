@@ -43,6 +43,28 @@ function App() {
     }
   }
 
+  async function startPipeServer() {
+    console.log("Starting pipe server...");
+    try {
+      await invoke("start_pipe_server");
+      console.log("Pipe server started successfully.");
+    } catch (error) {
+      console.error("Error starting pipe server:", error);
+    }
+  }
+
+  async function sendMessageToWin32Pipe() {
+    console.log("Sending message to Win32 pipe...");
+    try {
+      const response = await invoke("send_message_to_pipe", {
+        message: "Hello from React via Win32 pipe!",
+      });
+      console.log("Response from pipe:", response);
+    } catch (error) {
+      console.error("Error sending message to Win32 pipe:", error);
+    }
+  }
+
   return (
     <main className="container">
       <h1>Welcome to Tauri + React</h1>
@@ -79,6 +101,8 @@ function App() {
       <div className="row">
         <button onClick={sendNotification}>Send Notification</button>
         <button onClick={sendNotificationToPipe}>Send Notification to Pipe</button>
+        <button onClick={startPipeServer}>Start Win32 Pipe Server</button>
+        <button onClick={sendMessageToWin32Pipe}>Send Message to Win32 Pipe</button>
       </div>
     </main>
   );
