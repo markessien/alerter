@@ -1,6 +1,5 @@
 mod notification_client;
-mod pipe_client;
-mod win32_pipe_client;
+mod http_client;
 use tauri_plugin_dialog::DialogExt;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -31,9 +30,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             send_telex_notification,
-            notification_client::send_notification_to_pipe,
-            win32_pipe_client::start_pipe_server,
-            win32_pipe_client::send_message_to_pipe
+            notification_client::send_notification_to_http
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

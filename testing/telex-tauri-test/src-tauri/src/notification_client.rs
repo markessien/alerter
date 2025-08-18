@@ -1,4 +1,4 @@
-use crate::pipe_client;
+use crate::http_client;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -14,15 +14,15 @@ use tauri::AppHandle;
 use tauri_plugin_dialog::DialogExt;
 
 #[tauri::command]
-pub async fn send_notification_to_pipe(
+pub async fn send_notification_to_http(
     app: AppHandle,
     payload: NotificationPayload,
 ) -> Result<(), String> {
     app.dialog()
-        .message("Entered send_notification_to_pipe")
+        .message("Entered send_notification_to_http")
         .show(|_| {});
 
-    if let Err(e) = pipe_client::send_notification(
+    if let Err(e) = http_client::send_notification(
         app,
         &payload.message,
         &payload.sender_name,

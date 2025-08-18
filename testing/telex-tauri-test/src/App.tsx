@@ -25,43 +25,21 @@ function App() {
     }
   }
 
-  async function sendNotificationToPipe() {
-    console.log("Sending notification to pipe...");
+  async function sendNotificationToHttp() {
+    console.log("Sending notification to http...");
     try {
-      await invoke("send_notification_to_pipe", {
+      await invoke("send_notification_to_http", {
         payload: {
-          message: "Hello from React via named pipe!",
-          sender_name: "React Pipe Client",
-          channel: "Pipe",
+          message: "Hello from React via http!",
+          sender_name: "React http Client",
+          channel: "http",
           icon_path: "path/to/icon.png",
           timestamp: new Date().toISOString(),
         },
       });
-      console.log("Notification sent successfully to pipe.");
+      console.log("Notification sent successfully to http.");
     } catch (error) {
-      console.error("Error sending notification to pipe:", error);
-    }
-  }
-
-  async function startPipeServer() {
-    console.log("Starting pipe server...");
-    try {
-      await invoke("start_pipe_server");
-      console.log("Pipe server started successfully.");
-    } catch (error) {
-      console.error("Error starting pipe server:", error);
-    }
-  }
-
-  async function sendMessageToWin32Pipe() {
-    console.log("Sending message to Win32 pipe...");
-    try {
-      const response = await invoke("send_message_to_pipe", {
-        message: "Hello from React via Win32 pipe!",
-      });
-      console.log("Response from pipe:", response);
-    } catch (error) {
-      console.error("Error sending message to Win32 pipe:", error);
+      console.error("Error sending notification to http:", error);
     }
   }
 
@@ -100,9 +78,7 @@ function App() {
 
       <div className="row">
         <button onClick={sendNotification}>Send Notification</button>
-        <button onClick={sendNotificationToPipe}>Send Notification to Pipe</button>
-        <button onClick={startPipeServer}>Start Win32 Pipe Server</button>
-        <button onClick={sendMessageToWin32Pipe}>Send Message to Win32 Pipe</button>
+        <button onClick={sendNotificationToHttp}>Send Notification to Http</button>
       </div>
     </main>
   );
