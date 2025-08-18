@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+    <script type="module">
+    // We're using unpkg for a quick example import
+    import { emit } from 'https://unpkg.com/@tauri-apps/api@2/event.js';
+
+    // Emit the event to trigger the Rust listener
+    emit('ipc-router', {
+        command: 'greet-telex',
+        args: { name: 'World-telex' }
+        });
+    </script>
+
+</head>
+<body>
+    <h1>Hello World</h1>
+    <div id="js-message"></div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,35 +1,42 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "telex-tauri-test",
+  "identifier": "com.yourcompany.yourapp.dev",
   "version": "0.1.0",
-  "identifier": "com.telex-tauri-test.app",
   "build": {
-    "beforeDevCommand": "pnpm dev",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../dist"
+    "devUrl": "http://localhost:5000",
+
+    "beforeDevCommand": "",
+    "beforeBuildCommand": ""
   },
   "app": {
     "windows": [
       {
-        "title": "telex-tauri-test",
+        "title": "Localhost App",
         "width": 800,
         "height": 600
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self' tauri: http://localhost:5000 ws://localhost:5000",
+      "capabilities": [
+        {
+          "identifier": "remote-access",
+          "description": "Allows our remote site to call the greet command.",
+          "windows": ["main"],
+          "remote": {
+            "urls": ["http://localhost:5000"]
+          },
+          "permissions": [
+            "core:event:allow-emit" 
+          ]
+        }
+      ]
     }
   },
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ]
+    "icon": []
   }
 }
