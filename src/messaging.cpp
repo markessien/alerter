@@ -1,14 +1,17 @@
 #include "messaging.h"
 #include "logger.h"
+#include <thread>
 
 wxDEFINE_EVENT(wxEVT_COMMAND_MYTHREAD_NOTIFICATION, wxThreadEvent);
 
 Messaging::Messaging(wxEvtHandler* pParent)
-    : m_pParent(pParent), m_readerThread(nullptr), m_writerThread(nullptr) {}
+    : m_pParent(pParent), m_readerThread(nullptr), m_writerThread(nullptr), m_httpThread() {}
 
 Messaging::~Messaging() {
     Stop();
 }
+
+#include "http_server.h"
 
 void Messaging::Start() {
     m_readerThread = new ReaderThread(m_pParent, m_responseQueue);
@@ -21,9 +24,14 @@ void Messaging::Start() {
         m_readerThread = nullptr;
         m_writerThread = nullptr;
     }
+
+    m_httpThread = std::thread(run_http_server, m_pParent);
+    m_httpThread.detach();
 }
 
 void Messaging::Stop() {
+    stop_http_server();
+
     // Signal the writer thread to shut down
     if (m_writerThread) {
         m_responseQueue.Post("shutdown");

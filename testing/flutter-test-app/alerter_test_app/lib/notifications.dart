@@ -1,27 +1,15 @@
-import 'package:alerter_test_app/pipe_reader.dart';
-import 'package:alerter_test_app/pipe_writer.dart';
+import 'package:alerter_test_app/http_client.dart';
 
 class Notifications {
   final Function(String)? _logger;
-  late final PipeWriter _pipeWriter;
-  late final PipeReader _pipeReader;
+  late final HttpClient _httpClient;
 
   Notifications({Function(String)? logger}) : _logger = logger {
-    _pipeWriter = PipeWriter(logger: _log);
-    _pipeReader = PipeReader(logger: _log, onMessage: _handleMessage);
+    _httpClient = HttpClient(logger: _log);
   }
 
   Future<void> send(Map<String, dynamic> jsonData) async {
-    await _pipeWriter.send(jsonData);
-  }
-
-  void _handleMessage(Map<String, dynamic> message) {
-    _log('Received message: $message');
-  }
-
-  Future<void> close() async {
-    await _pipeWriter.close();
-    await _pipeReader.close();
+    await _httpClient.send(jsonData);
   }
 
   void _log(String message) {

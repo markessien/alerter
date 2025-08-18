@@ -52,7 +52,7 @@
                 "kernel32.lib", "user32.lib", "gdi32.lib", "winspool.lib", 
                 "comdlg32.lib", "advapi32.lib", "shell32.lib", "ole32.lib",
                 "oleaut32.lib", "uuid.lib", "comctl32.lib", "rpcrt4.lib",
-                "wininet.lib", "winmm.lib",
+                "wininet.lib", "winmm.lib", "ws2_32.lib",
                 "${workspaceFolder}\\build\\icon.res"
             ],
             "group": {
@@ -71,8 +71,12 @@
                 "/EHsc", "/MT", "/D", "WXUSING_LIBS", "/D", "__WXMSW__", 
                 "/std:c++17", "/O2", "/Fe:${workspaceFolder}\\build\\telexstart.exe",
                 "/Fo:${workspaceFolder}\\build\\", "/Fd:${workspaceFolder}\\build\\",
-                "${workspaceFolder}\\*.cpp", "/I", "${workspaceFolder}\\include",
-                "/I", "${workspaceFolder}\\wxWidgets\\include",
+                "${workspaceFolder}\\src\\*.cpp",
+                "${workspaceFolder}\\src\\ui\\*.cpp",
+                "/I", "${workspaceFolder}\\include",
+                "/I", "${workspaceFolder}\\third_party",
+                "/I", "${workspaceFolder}\\res",
+                "/I", "${workspaceFolder}\\third_party\\wxWidgets\\include",
                 "/I", "${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib\\mswu",
                 "/link", "/LIBPATH:${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib",
                 "wxmsw32u_adv.lib", "wxmsw32u_core.lib", "wxbase32u.lib", 
@@ -80,7 +84,7 @@
                 "wxregexu.lib", "wxexpat.lib", "kernel32.lib", "user32.lib", 
                 "gdi32.lib", "winspool.lib", "comdlg32.lib", "advapi32.lib", 
                 "shell32.lib", "ole32.lib", "oleaut32.lib", "uuid.lib", 
-                "comctl32.lib", "rpcrt4.lib", "wininet.lib", "winmm.lib",
+                "comctl32.lib", "rpcrt4.lib", "wininet.lib", "winmm.lib", "ws2_32.lib",
                 "${workspaceFolder}\\build\\icon.res"
             ],
             "group": "build",

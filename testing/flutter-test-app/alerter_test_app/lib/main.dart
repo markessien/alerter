@@ -47,7 +47,6 @@ class _MainAppState extends State<MainApp> {
     _channelNameController.dispose();
     _userNameController.dispose();
     _messageController.dispose();
-    _notifications.close();
     super.dispose();
   }
 
