@@ -4,7 +4,7 @@
   "identifier": "com.yourcompany.yourapp.dev",
   "version": "0.1.0",
   "build": {
-    "devUrl": "http://localhost:5000",
+    "devUrl": "https://staging.telex.im/terms-of-service",
 
     "beforeDevCommand": "",
     "beforeBuildCommand": ""
@@ -18,14 +18,14 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' tauri: http://localhost:5000 ws://localhost:5000",
+      "csp": "default-src 'self' tauri: https://staging.telex.im/terms-of-service ws://staging.telex.im/terms-of-service",
       "capabilities": [
         {
           "identifier": "remote-access",
           "description": "Allows our remote site to call the greet command.",
           "windows": ["main"],
           "remote": {
-            "urls": ["http://localhost:5000"]
+            "urls": ["https://staging.telex.im/terms-of-service"]
           },
           "permissions": [
             "core:event:allow-emit" 

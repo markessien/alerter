@@ -5,6 +5,7 @@
 #include "json.hpp"
 #include <wx/wx.h>
 #include "messaging.h"
+#include <wx/datetime.h>
 
 using json = nlohmann::json;
 
@@ -22,7 +23,14 @@ void run_http_server(wxEvtHandler* parent) {
                 payload.push_back(wxString::FromUTF8(j.value("senderName", "")));
                 payload.push_back(wxString::FromUTF8(j.value("channel", "")));
                 payload.push_back(wxString::FromUTF8(j.value("iconPath", "")));
-                payload.push_back(wxString::FromUTF8(j.value("timestamp", "")));
+                wxString timestampStr = wxString::FromUTF8(j.value("timestamp", ""));
+                wxDateTime timestamp;
+                if (!timestampStr.IsEmpty() && timestamp.ParseISOCombined(timestampStr, ' ')) {
+                    // Successfully parsed
+                } else {
+                    timestamp = wxDateTime::Now();
+                }
+                payload.push_back(timestamp.FormatISOCombined('T'));
                 payload.push_back(wxString::FromUTF8(j.value("type", "")));
 
                 wxThreadEvent* event = new wxThreadEvent(wxEVT_COMMAND_MYTHREAD_NOTIFICATION);

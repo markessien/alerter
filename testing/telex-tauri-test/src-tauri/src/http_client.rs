@@ -1,5 +1,4 @@
 use tauri::AppHandle;
-use tauri_plugin_dialog::DialogExt;
 
 const HTTP_ENDPOINT: &str = "http://127.0.0.1:27810";
 
@@ -11,9 +10,6 @@ pub async fn send_notification(
     icon_path: &str,
     timestamp: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    app.dialog()
-        .message("Entered http send_notification")
-        .show(|_| {});
 
     let payload = serde_json::json!({
         "message": message,
@@ -38,18 +34,16 @@ pub async fn send_notification(
     match res {
         Ok(response) => {
             if response.status().is_success() {
-                app.dialog().message("Write to http successful").show(|_| {});
+                println!("Write to http successful");
                 Ok(())
             } else {
                 let error_message = format!("HTTP request failed with status: {}", response.status());
-                app.dialog().message(&error_message).show(|_| {});
+                eprintln!("{}", error_message);
                 Err(error_message.into())
             }
         }
         Err(e) => {
-            app.dialog()
-                .message(format!("Write to http failed: {}", e))
-                .show(|_| {});
+            eprintln!("Write to http failed: {}", e);
             Err(e.into())
         }
     }
