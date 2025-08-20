@@ -13,10 +13,24 @@
             "group": "build"
         },
         {
+            "label": "Compile Resources (wxrc)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\third_party\\wxWidgets\\utils\\wxrc\\vc_x64_mswu\\wxrc.exe",
+            "args": [
+                "${workspaceFolder}\\res\\resources.xrc",
+                "--cpp-code",
+                "--output=${workspaceFolder}\\res\\resources.cpp"
+            ],
+            "group": "build"
+        },
+        {
             "label": "Build TelexStart - Debug",
             "type": "shell",
             "command": "cl.exe",
-            "dependsOn": "Compile Resources",
+            "dependsOn": [
+                "Compile Resources",
+                "Compile Resources (wxrc)"
+            ],
             "args": [
                 "/EHsc",
                 "/MTd", // Use debug runtime library
@@ -26,10 +40,11 @@
                 "/D", "__WXMSW__",
                 "/D", "WXDEBUG", // Often used in wxWidgets for debug builds
                 "/std:c++17",
-                "/Fe:${workspaceFolder}\\build\\telexstart_d.exe", // Debug executable name
-                "/Fo:${workspaceFolder}\\build\\",
-                "/Fd:${workspaceFolder}\\build\\",
+                "/Fe:${workspaceFolder}\\build\\debug\\telexstart_d.exe", // Debug executable name
+                "/Fo:${workspaceFolder}\\build\\debug\\",
+                "/Fd:${workspaceFolder}\\build\\debug\\",
                 "${workspaceFolder}\\src\\*.cpp",
+                "${workspaceFolder}\\res\\resources.cpp",
                 "${workspaceFolder}\\src\\ui\\*.cpp",
                 "/I", "${workspaceFolder}\\include",
                 "/I", "${workspaceFolder}\\third_party",
@@ -37,6 +52,7 @@
                 "/I", "${workspaceFolder}\\third_party\\wxWidgets\\include",
                 "/I", "${workspaceFolder}\\third_party\\wxWidgets\\lib\\vc_x64_lib\\mswud", 
                 "/link",
+                "/MANIFEST:EMBED",
                 "/DEBUG", // Tell linker to include debug info
                 "/LIBPATH:${workspaceFolder}\\third_party\\wxWidgets\\lib\\vc_x64_lib",                
                 "wxmsw32ud_adv.lib",
@@ -48,6 +64,10 @@
                 "wxzlibd.lib",
                 "wxregexud.lib",
                 "wxexpatd.lib",
+                "wxmsw32ud_xrc.lib",
+                "wxmsw32ud_xrc.lib",    // XRC
+                "wxbase32ud_xml.lib",   // XML
+                "wxmsw32ud_html.lib",   // HTML
                 // Windows System Libraries
                 "kernel32.lib", "user32.lib", "gdi32.lib", "winspool.lib", 
                 "comdlg32.lib", "advapi32.lib", "shell32.lib", "ole32.lib",
@@ -66,21 +86,29 @@
             "label": "Build TelexStart - Release",
             "type": "shell",
             "command": "cl.exe",
-            "dependsOn": "Compile Resources",
+            "dependsOn": [
+                "Compile Resources",
+                "Compile Resources (wxrc)"
+            ],
             "args": [
                 "/EHsc", "/MT", "/D", "WXUSING_LIBS", "/D", "__WXMSW__", 
-                "/std:c++17", "/O2", "/Fe:${workspaceFolder}\\build\\telexstart.exe",
-                "/Fo:${workspaceFolder}\\build\\", "/Fd:${workspaceFolder}\\build\\",
+                "/std:c++17", "/O2", "/Fe:${workspaceFolder}\\executables\\telexstart.exe",
+                "/Fo:${workspaceFolder}\\build\\release\\", "/Fd:${workspaceFolder}\\build\\release\\",
                 "${workspaceFolder}\\src\\*.cpp",
                 "${workspaceFolder}\\src\\ui\\*.cpp",
+                "${workspaceFolder}\\res\\resources.cpp",
                 "/I", "${workspaceFolder}\\include",
                 "/I", "${workspaceFolder}\\third_party",
                 "/I", "${workspaceFolder}\\res",
                 "/I", "${workspaceFolder}\\third_party\\wxWidgets\\include",
-                "/I", "${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib\\mswu",
-                "/link", "/LIBPATH:${workspaceFolder}\\wxWidgets\\lib\\vc_x64_lib",
+                "/I", "${workspaceFolder}\\third_party\\wxWidgets\\lib\\vc_x64_lib\\mswu",
+                "/link", "/MANIFEST:EMBED", "/LIBPATH:${workspaceFolder}\\third_party\\wxWidgets\\lib\\vc_x64_lib",
                 "wxmsw32u_adv.lib", "wxmsw32u_core.lib", "wxbase32u.lib", 
                 "wxpng.lib", "wxjpeg.lib", "wxtiff.lib", "wxzlib.lib", 
+                "wxmsw32u_xrc.lib",     // XRC
+                "wxbase32u_xml.lib",    // XML
+                "wxmsw32u_html.lib",    // HTML
+                "wxmsw32u_xrc.lib",
                 "wxregexu.lib", "wxexpat.lib", "kernel32.lib", "user32.lib", 
                 "gdi32.lib", "winspool.lib", "comdlg32.lib", "advapi32.lib", 
                 "shell32.lib", "ole32.lib", "oleaut32.lib", "uuid.lib", 
@@ -90,6 +118,17 @@
             "group": "build",
             "presentation": { "reveal": "always" },
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Build TelexStart - All",
+            "dependsOn": [
+                "Build TelexStart - Debug",
+                "Build TelexStart - Release"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

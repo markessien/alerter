@@ -26,3 +26,12 @@ Take note - we compile it statically.
 - Clean any previous build with nmake -f makefile.vc clean BUILD=release
 - Run nmake on it in this way nmake -f makefile.vc RUNTIME_LIBS=static SHARED=0 MONOLITHIC=0 BUILD=release TARGET_CPU=X64. This creates a release version that is statically linked. This will take a while to build. Build the debug version too with nmake -f makefile.vc RUNTIME_LIBS=static SHARED=0 MONOLITHIC=0 BUILD=debug TARGET_CPU=X64. you need the debug version for step through debugging. 
 - Once done, all the libs for linking will be in \lib\vc_x64_lib. Take note that this is referenced in tasks.json
+
+## Building wxrc
+
+Go to the wxrc folder TelexStart\third_party\wxWidgets\utils\wxrc
+
+nmake -f makefile.vc clean BUILD=release RUNTIME_LIBS=static SHARED=0 MONOLITHIC=0 TARGET_CPU=X64
+nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static SHARED=0 MONOLITHIC=0 TARGET_CPU=X64
+
+the exe will be in vc_x64_mswu

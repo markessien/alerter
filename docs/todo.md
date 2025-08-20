@@ -1,3 +1,4 @@
+/ Verz important / release app uses debug wx
 - launch the main app when opened
 - If opened twice, bring the main app to foreground or launch it if needed
 - fix the difference between channel and dm messages

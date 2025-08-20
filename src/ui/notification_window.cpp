@@ -1,6 +1,9 @@
 #include "notification_window.h"
 #include "icon.h"
 #include "messaging.h"
+#include <wx/xrc/xmlres.h>
+#include "images.h"
+
 #ifdef __WXMSW__
 #include <windows.h>
 #endif
@@ -10,15 +13,40 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
     int width,
     int headerHeight)
 {
-    wxBitmap closeBitmap = wxBitmapBundle::FromSVGFile(wxT("res/images/x.svg"), wxSize(16, 16)).GetBitmap(wxDefaultSize);
-    wxImage titleBarImage(wxT("res/images/small_logo28.png"), wxBITMAP_TYPE_PNG);
-    wxBitmap titleBarBitmap(titleBarImage);
+    wxMemoryInputStream stream(_acclose, _acclose_size);
+    wxImage image;
+    if (!image.LoadFile(stream, wxBITMAP_TYPE_PNG))
+    {
+        // Handle the error if the image data is invalid
+        wxLogError("Failed to load embedded PNG image.");
+    }
+
+    wxBitmap closeBitmap(image);
+
+
+    wxMemoryInputStream stream2(_acsmall_logo28, _acsmall_size);
+    wxImage image2;
+    if (!image2.LoadFile(stream2, wxBITMAP_TYPE_PNG))
+    {
+        // Handle the error if the image data is invalid
+        wxLogError("Failed to load embedded PNG image.");
+    }
+
+    wxBitmap titleBarBitmap(image2);
+
+
+    // wxBitmap closeBitmap = wxBitmapBundle::FromSVGFile(wxT("res/images/x.svg"), wxSize(16, 16)).GetBitmap(wxDefaultSize);
+    // wxImage titleBarImage(wxT("res/images/small_logo28.png"), wxBITMAP_TYPE_PNG);
+    // wxBitmap titleBarBitmap(titleBarImage);
+
+    // wxBitmap titleBarBitmap = wxXmlResource::Get()->LoadBitmap("titlebar_png");
+    // wxBitmap closeBitmap = wxXmlResource::Get()->LoadBitmap("close_png");
+    // wxBitmapBundle closeButtonBundle = wxBitmapBundle::FromPNG(_acclose, _acclose_size);
 
     if (!closeBitmap.IsOk() || !titleBarBitmap.IsOk())
     {
         wxMessageBox(
-            "Could not load image resources.\n"
-            "Please make sure the icons exist in the folder.",
+            "Could not load embedded image resources - titleBar and closeBitmap.\n",
             "Error", wxOK | wxICON_ERROR);
         wxPendingDelete.Append(this);
         return;

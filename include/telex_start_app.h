@@ -14,6 +14,7 @@ public:
     virtual int OnExit();
     void ShowWindow();
     void OnActivateAnotherInstance();
+    NotificationWindow* GetNotificationWindow() { return m_frame; }
 
 private:
     NotificationWindow* m_frame;

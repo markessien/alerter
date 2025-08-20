@@ -18,6 +18,7 @@ private:
     void OnMenuShowNotifications(wxCommandEvent&);
     void OnMenuOpenMainApp(wxCommandEvent&);
     void OnMenuCloseMainApp(wxCommandEvent&);
+    void OnMenuTestNotification(wxCommandEvent&);
     void OnMenuExit(wxCommandEvent&);
     TelexStartApp* m_app;
 #ifdef __WXMSW__

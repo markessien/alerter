@@ -1,4 +1,11 @@
+#include <wx/wx.h>
+#include <wx/statline.h>
+#include <wx/mstream.h>
+#include <wx/graphics.h>
+
+
 #include "notification_content.h"
+#include "images.h"
 
 NotificationContent::NotificationContent(wxWindow* parent,
     const wxString& channel,
@@ -20,8 +27,19 @@ NotificationContent::NotificationContent(wxWindow* parent,
     }
     else
     {
-        alertUserImage.LoadFile(wxT("res/images/logo48.png"), wxBITMAP_TYPE_PNG);
+        wxMemoryInputStream stream(_aclogo48, _aclogo48_size);
+
+        wxImage image;
+        if (!image.LoadFile(stream, wxBITMAP_TYPE_PNG))
+        {
+            // Handle the error if the image data is invalid
+            wxLogError("Failed to load embedded PNG image.");
+        }
+        
+        alertUserImage = image;
+
     }
+
     alertUserImage.Rescale(48, 48);
     wxBitmap alertUserBitmap(alertUserImage);
     wxStaticBitmap* alertUserIcon = new wxStaticBitmap(this, wxID_ANY, alertUserBitmap);
