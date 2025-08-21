@@ -1,70 +1,50 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 project(TelexStart)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/third_party/wxWidgets)
-find_package(wxWidgets COMPONENTS core base adv html xml xrc REQUIRED)
-
-if(WIN32)
-    set(RC_FILE ${CMAKE_SOURCE_DIR}/res/icon.rc)
-    set(RC_COMPILED ${CMAKE_BINARY_DIR}/icon.res)
-    add_custom_command(
-        OUTPUT ${RC_COMPILED}
-        COMMAND rc.exe /fo ${RC_COMPILED} ${RC_FILE}
-        DEPENDS ${RC_FILE}
-    )
-endif()
-
-set(XRC_FILE ${CMAKE_SOURCE_DIR}/res/resources.xrc)
-set(XRC_CPP ${CMAKE_SOURCE_DIR}/res/resources.cpp)
-add_custom_command(
-    OUTPUT ${XRC_CPP}
-    COMMAND ${wxWidgets_ROOT_DIR}/utils/wxrc/vc_x64_mswu/wxrc.exe ${XRC_FILE} --cpp-code --output=${XRC_CPP}
-    DEPENDS ${XRC_FILE}
-)
+find_package(wxWidgets CONFIG REQUIRED)
+find_package(httplib CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "res/resources.cpp")
 
-add_executable(telexstart ${SOURCES} ${RC_COMPILED} ${XRC_CPP})
+add_executable(telexstart ${SOURCES})
 
 target_include_directories(telexstart PRIVATE
     ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/third_party
     ${CMAKE_SOURCE_DIR}/res
-    ${wxWidgets_INCLUDE_DIRS}
 )
 
 target_link_libraries(telexstart PRIVATE
-    ${wxWidgets_LIBRARIES}
+    httplib::httplib
+    wx::core
+    wx::base
+    nlohmann_json::nlohmann_json
+    # Windows-specific libraries needed by your original file
     wininet
-    winmm
     ws2_32
-    comctl32
     rpcrt4
-)
-
-set_target_properties(telexstart PROPERTIES
-    WIN32_EXECUTABLE TRUE
-    MACOSX_BUNDLE TRUE
+    comctl32
+    gdiplus
 )
 
 if(MSVC)
-    target_compile_definitions(telexstart PRIVATE WXUSING_LIBS __WXMSW__)
+    # This hides the console window for a GUI application
+    set_target_properties(telexstart PROPERTIES WIN32_EXECUTABLE TRUE)
+
+    # Use /EHsc for exception handling
     target_compile_options(telexstart PRIVATE /EHsc)
+    
+    # Configure settings for Debug vs. Release
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_definitions(telexstart PRIVATE WXDEBUG)
+        # Use the Multithreaded-Debug DLL runtime
         target_compile_options(telexstart PRIVATE /MTd /Zi /Od)
         target_link_options(telexstart PRIVATE /DEBUG)
         set_target_properties(telexstart PROPERTIES OUTPUT_NAME "telexstart_d")
     else()
+        # Use the Multithreaded DLL runtime for Release
         target_compile_options(telexstart PRIVATE /MT /O2)
     endif()
 endif()
-
-install(TARGETS telexstart
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)

@@ -1,17 +1,11 @@
 #include "telex_start_app.h"
 #include "task_bar_icon.h"
 #include "messaging.h"
-#include <wx/xrc/xmlres.h>
 
 bool TelexStartApp::OnInit()
 {
     SetVendorName("Telex.im");     // or your Verein/project name
     SetAppName("Telex");       // your app name
-
-    wxXmlResource::Get()->InitAllHandlers();
-    // wxXmlResource::Get()->LoadFromResource(this, "MY_RESOURCES", "XRC");
-
-    // wxXmlResource::Get()->Load(wxT("res/resources.xrc"));
 
     m_checker = new wxSingleInstanceChecker;
     if (m_checker->IsAnotherRunning())

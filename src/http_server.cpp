@@ -2,7 +2,7 @@
 #include "httplib.h"
 #include "telex_protocol.h"
 #include "notifications.h"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <wx/wx.h>
 #include "messaging.h"
 #include <wx/datetime.h>

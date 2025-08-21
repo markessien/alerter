@@ -11,7 +11,8 @@
                 "-B",
                 "${workspaceFolder}/build/debug",
                 "-D",
-                "CMAKE_BUILD_TYPE=Debug"
+                "CMAKE_BUILD_TYPE=Debug",
+                "-DCMAKE_TOOLCHAIN_FILE=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/vcpkg/scripts/buildsystems/vcpkg.cmake"
             ],
             "group": "build"
         },
@@ -39,7 +40,8 @@
                 "-B",
                 "${workspaceFolder}/build/release",
                 "-D",
-                "CMAKE_BUILD_TYPE=Release"
+                "CMAKE_BUILD_TYPE=Release",
+                "-DCMAKE_TOOLCHAIN_FILE=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/vcpkg/scripts/buildsystems/vcpkg.cmake"
             ],
             "group": "build"
         },
