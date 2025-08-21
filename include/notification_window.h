@@ -11,6 +11,10 @@
 #include "notifications.h"
 #include "notification_content.h"
 
+wxDECLARE_EVENT(wxEVT_COMMAND_APP_REQUESTEXIT, wxCommandEvent);
+
+class TaskBarIcon;
+
 class NotificationWindow : public wxFrame
 {
 public:
@@ -28,6 +32,7 @@ private:
     void OnNotificationTimer(wxTimerEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnNotification(wxThreadEvent& event);
+    void OnRequestExitApp(wxCommandEvent& event);
 
     wxPoint m_delta;
     NotificationManager notifications;
@@ -36,6 +41,7 @@ private:
     std::vector<NotificationContent*> m_contentAreas;
     wxTimer* m_playbackTimer;
     wxTimer* m_notificationTimer;
+    TaskBarIcon* m_taskBarIcon;
 
     enum
     {

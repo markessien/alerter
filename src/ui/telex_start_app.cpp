@@ -25,7 +25,6 @@ bool TelexStartApp::OnInit()
     wxImage::AddHandler(new wxICOHandler);
 
     m_frame = new NotificationWindow(NULL, "TELEX");
-    m_taskBarIcon = new TaskBarIcon(this);
     m_messaging = new Messaging(m_frame);
 
     m_messaging->Start();
@@ -35,14 +34,17 @@ bool TelexStartApp::OnInit()
 
 int TelexStartApp::OnExit()
 {
-    delete m_taskBarIcon;
     if (m_messaging)
     {
         m_messaging->Stop();
         delete m_messaging;
         m_messaging = NULL;
     }
-    delete m_checker;
+    if (m_checker)
+    {
+        delete m_checker;
+        m_checker = NULL;
+    }
     return wxApp::OnExit();
 }
 
@@ -56,8 +58,5 @@ void TelexStartApp::ShowWindow()
 
 void TelexStartApp::OnActivateAnotherInstance()
 {
-    if (m_taskBarIcon)
-    {
-        // m_taskBarIcon->Blink();
-    }
 }
+

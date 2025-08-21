@@ -7,6 +7,7 @@
 #include "notification_content.h"
 #include "images.h"
 
+
 NotificationContent::NotificationContent(wxWindow* parent,
     const wxString& channel,
     const wxString& sender,

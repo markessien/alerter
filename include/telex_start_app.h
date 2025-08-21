@@ -4,7 +4,6 @@
 #include "notification_window.h"
 #include <wx/snglinst.h>
 
-class TaskBarIcon; // Forward declaration
 class Messaging; // Forward declaration
 
 class TelexStartApp : public wxApp
@@ -18,7 +17,6 @@ public:
 
 private:
     NotificationWindow* m_frame;
-    TaskBarIcon* m_taskBarIcon;
     Messaging* m_messaging;
     wxSingleInstanceChecker* m_checker;
 };

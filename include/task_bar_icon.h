@@ -3,12 +3,12 @@
 #include <wx/wx.h>
 #include <wx/taskbar.h>
 
-class TelexStartApp;
+wxDECLARE_EVENT(wxEVT_COMMAND_APP_REQUESTEXIT, wxCommandEvent);
 
 class TaskBarIcon : public wxTaskBarIcon
 {
 public:
-    TaskBarIcon(TelexStartApp* app);
+    TaskBarIcon(wxWindow* parent);
     virtual wxMenu *CreatePopupMenu();
 #ifdef __WXMSW__
     virtual bool PopupMenu(wxMenu *menu);
@@ -19,8 +19,9 @@ private:
     void OnMenuOpenMainApp(wxCommandEvent&);
     void OnMenuCloseMainApp(wxCommandEvent&);
     void OnMenuTestNotification(wxCommandEvent&);
+    void OnMenuLogin(wxCommandEvent&);
     void OnMenuExit(wxCommandEvent&);
-    TelexStartApp* m_app;
+    wxWindow* m_parent;
 #ifdef __WXMSW__
     PROCESS_INFORMATION m_processInformation;
 #endif
