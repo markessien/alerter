@@ -10,16 +10,20 @@
 #include <wx/timer.h>
 #include "notifications.h"
 #include "notification_content.h"
+#include "telex.h" // Include Telex header
 
 wxDECLARE_EVENT(wxEVT_COMMAND_APP_REQUESTEXIT, wxCommandEvent);
+wxDECLARE_EVENT(wxEVT_COMMAND_SHOW_LOGIN_DIALOG, wxCommandEvent); // New custom event
+wxDECLARE_EVENT(wxEVT_COMMAND_TEST_NOTIFICATION, wxCommandEvent);
 
 class TaskBarIcon;
 
 class NotificationWindow : public wxFrame
 {
 public:
-    NotificationWindow(wxWindow* parent, const wxString& title);
+    NotificationWindow(wxWindow* parent, const wxString& title, Telex* telex); // Add Telex* parameter
     void AddNotification(const wxString& channel, const wxString& sender, const wxString& time, const wxString& message, const wxString& iconPath);
+    void ShowLoginDialog(wxCommandEvent& event); // New function to show login dialog
 
 private:
     void CreateNotificationWindow(wxWindow* parent, const wxString& title, int width, int headerHeight);
@@ -33,6 +37,7 @@ private:
     void OnClose(wxCloseEvent& event);
     void OnNotification(wxThreadEvent& event);
     void OnRequestExitApp(wxCommandEvent& event);
+    void OnTestNotification(wxCommandEvent& event);
 
     wxPoint m_delta;
     NotificationManager notifications;
@@ -42,6 +47,7 @@ private:
     wxTimer* m_playbackTimer;
     wxTimer* m_notificationTimer;
     TaskBarIcon* m_taskBarIcon;
+    Telex* m_telex; // Pointer to Telex instance
 
     enum
     {

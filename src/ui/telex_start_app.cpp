@@ -1,6 +1,7 @@
 #include "telex_start_app.h"
 #include "task_bar_icon.h"
 #include "messaging.h"
+#include "telex.h" // Include Telex header
 
 bool TelexStartApp::OnInit()
 {
@@ -18,7 +19,9 @@ bool TelexStartApp::OnInit()
     wxImage::AddHandler(new wxPNGHandler);
     wxImage::AddHandler(new wxICOHandler);
 
-    m_frame = new NotificationWindow(NULL, "TELEX");
+    m_telex = new Telex(); // Initialize Telex instance
+
+    m_frame = new NotificationWindow(NULL, "TELEX", m_telex); // Pass Telex instance to NotificationWindow
     m_messaging = new Messaging(m_frame);
 
     m_messaging->Start();
@@ -33,6 +36,11 @@ int TelexStartApp::OnExit()
         m_messaging->Stop();
         delete m_messaging;
         m_messaging = NULL;
+    }
+    if (m_telex)
+    {
+        delete m_telex;
+        m_telex = NULL;
     }
     if (m_checker)
     {

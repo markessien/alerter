@@ -2,6 +2,7 @@
 #include "icon.h"
 #include "messaging.h"
 #include "task_bar_icon.h"
+#include "login_dialog.h" // Include LoginDialog header
 #include <wx/xrc/xmlres.h>
 #include "images.h"
 
@@ -10,6 +11,8 @@
 #endif
 
 wxDEFINE_EVENT(wxEVT_COMMAND_APP_REQUESTEXIT, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_COMMAND_SHOW_LOGIN_DIALOG, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_COMMAND_TEST_NOTIFICATION, wxCommandEvent);
 
 
 void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
@@ -107,21 +110,23 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
 }
 
 NotificationWindow::NotificationWindow(wxWindow* parent,
-    const wxString& title)
+    const wxString& title, Telex* telex) // Add Telex* parameter
     : wxFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxSTAY_ON_TOP | wxFRAME_NO_TASKBAR),
-      m_taskBarIcon(nullptr)
+      m_taskBarIcon(nullptr),
+      m_telex(telex) // Initialize m_telex
 {
     CreateNotificationWindow(parent, title, 350, 40);
     m_taskBarIcon = new TaskBarIcon(this);
     m_playbackTimer = new wxTimer(this, ID_PlaybackTimer);
     m_notificationTimer = new wxTimer(this, ID_NotificationTimer);
-
     
     Bind(wxEVT_TIMER, &NotificationWindow::OnPlaybackTimer, this, ID_PlaybackTimer);
     Bind(wxEVT_TIMER, &NotificationWindow::OnNotificationTimer, this, ID_NotificationTimer);
     Bind(wxEVT_CLOSE_WINDOW, &NotificationWindow::OnClose, this);
     Bind(wxEVT_COMMAND_APP_REQUESTEXIT, &NotificationWindow::OnRequestExitApp, this);
     Bind(wxEVT_COMMAND_MYTHREAD_NOTIFICATION, &NotificationWindow::OnNotification, this);
+    Bind(wxEVT_COMMAND_SHOW_LOGIN_DIALOG, &NotificationWindow::ShowLoginDialog, this); // Bind custom event
+    Bind(wxEVT_COMMAND_TEST_NOTIFICATION, &NotificationWindow::OnTestNotification, this);
     
 
     m_notificationTimer->Start(1000);
@@ -132,6 +137,22 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
     SetClassLongPtr(hwnd, GCL_STYLE, style | CS_DROPSHADOW);
 #endif
 
+}
+
+void NotificationWindow::ShowLoginDialog(wxCommandEvent& event)
+{
+    LoginDialog loginDialog(this, m_telex); // Instantiate LoginDialog and pass Telex instance
+    if (loginDialog.ShowModal() == wxID_CANCEL)
+    {
+        // User cancelled login, close the notification window
+        Close(true);
+        return;
+    }
+}
+
+void NotificationWindow::OnTestNotification(wxCommandEvent& event)
+{
+    AddNotification("Test Channel", "Test Sender", "Now", "This is a test notification.", "");
 }
 
 void NotificationWindow::AddNotification(const wxString& channel, const wxString& sender, const wxString& time, const wxString& message, const wxString& iconPath)

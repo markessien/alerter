@@ -141,16 +141,12 @@ void TaskBarIcon::OnMenuExit(wxCommandEvent&)
 
 void TaskBarIcon::OnMenuTestNotification(wxCommandEvent&)
 {
-    if (m_parent)
-    {
-    //    m_parent->AddNotification("Test Channel", "Test Sender", "Now", "This is a test notification.", "");
-    }
+    wxQueueEvent(m_parent, new wxCommandEvent(wxEVT_COMMAND_TEST_NOTIFICATION));
 }
 
 void TaskBarIcon::OnMenuLogin(wxCommandEvent&)
 {
-    LoginDialog loginDialog(NULL);
-    loginDialog.ShowModal();
+    wxQueueEvent(m_parent, new wxCommandEvent(wxEVT_COMMAND_SHOW_LOGIN_DIALOG));
 }
 #ifdef __WXMSW__
 bool TaskBarIcon::PopupMenu(wxMenu *menu)

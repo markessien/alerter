@@ -15,9 +15,10 @@ wxBEGIN_EVENT_TABLE(LoginDialog, wxDialog)
     EVT_BUTTON(ID_CANCEL_BTN, LoginDialog::OnCancel)
 wxEND_EVENT_TABLE()
 
-LoginDialog::LoginDialog(wxWindow* parent, wxWindowID id, const wxString& title,
+LoginDialog::LoginDialog(wxWindow* parent, Telex* telex, wxWindowID id, const wxString& title,
                         const wxPoint& pos, const wxSize& size, long style)
-    : wxDialog(parent, id, title, pos, size, style)
+    : wxDialog(parent, id, title, pos, size, style),
+      m_telex(telex) // Initialize m_telex
 {
     // Create controls
     m_usernameCtrl = new wxTextCtrl(this, ID_USERNAME, wxEmptyString,
@@ -81,11 +82,16 @@ void LoginDialog::OnLogin(wxCommandEvent& event)
     }
 
     // For now, just show a message and close
-    wxString message = wxT("Login functionality not implemented yet.\n");
-    message += wxT("Username: ") + GetUsername();
-    wxMessageBox(message, wxT("Login"), wxICON_INFORMATION);
-
-    EndModal(wxID_OK);
+    if (m_telex->login(GetUsername().ToStdString(), GetPassword().ToStdString()))
+    {
+        wxMessageBox(wxT("Login successful!"), wxT("Login"), wxICON_INFORMATION);
+        EndModal(wxID_OK);
+    }
+    else
+    {
+        wxMessageBox(wxT("Login failed. Please check your username and password."),
+                     wxT("Login Error"), wxICON_ERROR);
+    }
 }
 
 void LoginDialog::OnCancel(wxCommandEvent& event)
