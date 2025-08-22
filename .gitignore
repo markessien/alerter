@@ -5,3 +5,4 @@ build
 *.log
 .env
 vcpkg
+env.json
