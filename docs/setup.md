@@ -14,6 +14,10 @@ Download it from the Visual Studio website.
 
 During installation, select the Desktop development with C++ workload.
 
+### 2.a Use vcpkg
+The below instructions are not valid, we use vcpkg now. Be sure to update to latest.
+
+
 ## 2. Build wxWidgets
 The wxWidgets library must be compiled from source first.
 

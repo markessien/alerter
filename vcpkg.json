@@ -3,8 +3,14 @@
   "version-string": "0.1.0",
   "dependencies": [
     "wxwidgets",
-    "cpp-httplib",
-    "nlohmann-json"
+    "nlohmann-json",
+    {
+      "name": "cpp-httplib",
+      "features": ["openssl"]
+    }
   ],
-  "builtin-baseline": "6ecbbbdf31cba47aafa7cf6189b1e73e10ac61f8"
+  "builtin-baseline": "6ecbbbdf31cba47aafa7cf6189b1e73e10ac61f8",
+  "vcpkg-configuration": {
+    "default-triplet": "x64-windows-static"
+  }
 }

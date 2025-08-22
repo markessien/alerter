@@ -21,9 +21,9 @@ LoginDialog::LoginDialog(wxWindow* parent, Telex* telex, wxWindowID id, const wx
       m_telex(telex) // Initialize m_telex
 {
     // Create controls
-    m_usernameCtrl = new wxTextCtrl(this, ID_USERNAME, wxEmptyString,
+    m_usernameCtrl = new wxTextCtrl(this, ID_USERNAME, "markessien@gmail.com",
                                    wxDefaultPosition, wxSize(200, -1));
-    m_passwordCtrl = new wxTextCtrl(this, ID_PASSWORD, wxEmptyString,
+    m_passwordCtrl = new wxTextCtrl(this, ID_PASSWORD, "123456789",
                                    wxDefaultPosition, wxSize(200, -1),
                                    wxTE_PASSWORD);
 
