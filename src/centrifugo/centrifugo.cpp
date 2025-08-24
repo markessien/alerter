@@ -2,7 +2,6 @@
 #include "centrifugo.h"
 #include <iostream>
 
-// Use the correct, full namespace for all generated types
 using namespace centrifugal::centrifugo::unistream;
 
 CentrifugoClient::CentrifugoClient() = default;
@@ -22,7 +21,7 @@ bool CentrifugoClient::Connect(const std::string& server_address, const std::str
 
     // 1. Create channel and stub
     channel_ = grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
-    // Use the correct service name 'CentrifugoUniStream' to create the stub
+
     stub_ = CentrifugoUniStream::NewStub(channel_);
 
     // 2. Prepare the request
@@ -30,7 +29,15 @@ bool CentrifugoClient::Connect(const std::string& server_address, const std::str
     
     ConnectRequest request;
     request.set_token(auth_token);
-
+ 
+    // Add any existing subscriptions to the request
+    {
+        std::lock_guard<std::mutex> lock(subs_mutex_);
+        for (const auto& pair : subscriptions_) {
+            (*request.mutable_subs())[pair.first] = pair.second;
+        }
+    }
+ 
     // 3. Initiate the stream
     stream_ = stub_->Consume(context_.get(), request);
 
@@ -76,7 +83,19 @@ void CentrifugoClient::Disconnect() {
 bool CentrifugoClient::IsConnected() const {
     return is_running_.load();
 }
-
+ 
+bool CentrifugoClient::Subscribe(const std::string& channel) {
+    if (IsConnected()) {
+        std::cerr << "Cannot subscribe while connected. Please subscribe before connecting." << std::endl;
+        return false;
+    }
+ 
+    std::lock_guard<std::mutex> lock(subs_mutex_);
+    subscriptions_[channel] = centrifugal::centrifugo::unistream::SubscribeRequest();
+    std::cout << "Channel '" << channel << "' marked for subscription." << std::endl;
+    return true;
+}
+ 
 void CentrifugoClient::ListenLoop() {
     Push push;
     // This loop continues as long as the stream is valid and we are in a "running" state
@@ -92,8 +111,7 @@ void CentrifugoClient::ListenLoop() {
     is_running_ = false;
 }
 
-// The method signature is now correct because the 'Push' type is resolved
-// by the 'using namespace' declaration at the top of the file.
+
 void CentrifugoClient::HandlePush(const Push& push) {
     // Check for each possible push type using has_*() methods
     if (push.has_connect()) {

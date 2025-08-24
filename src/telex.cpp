@@ -85,9 +85,13 @@ void Telex::testTelex() {
             std::cerr << "Failed to get subscription token for " << org.name << std::endl;
         }
     }
-
+ 
     CentrifugoClient client;
-    client.Connect("https://api.telex.im:11000/centrifugo", connectionToken);
+    for (const auto& org : organisations) {
+        std::string channel = org.id + "/" + user_id_;
+        client.Subscribe(channel);
+    }
+    client.Connect("rtc.telex.im:11000", connectionToken);
 }
 
 std::string Telex::getSubscriptionToken(const std::string& channel) {

@@ -6,7 +6,9 @@
 #include <memory>
 #include <thread>
 #include <atomic>
-
+#include <mutex>
+#include <map>
+ 
 #include <grpcpp/grpcpp.h>
 #include "unistream.grpc.pb.h"
 
@@ -41,6 +43,13 @@ public:
      */
     bool IsConnected() const;
 
+    /**
+     * @brief Subscribes to a channel.
+     * @param channel The name of the channel to subscribe to.
+     * @return True if the subscription request was successfully added, false otherwise.
+     */
+    bool Subscribe(const std::string& channel);
+ 
 private:
     /**
      * @brief The main loop that runs on a separate thread to read messages from the stream.
@@ -51,7 +60,6 @@ private:
      * @brief A callback-like function to process incoming push messages.
      * @param push The received push message.
      */
-    // Corrected the namespace for the Push message type
     void HandlePush(const centrifugal::centrifugo::unistream::Push& push);
 
     // --- Member Variables ---
@@ -66,11 +74,14 @@ private:
     std::unique_ptr<grpc::ClientContext> context_;
     std::shared_ptr<grpc::Channel> channel_;
     
-    // Corrected the service name to CentrifugoUniStream and its namespace
     std::unique_ptr<centrifugal::centrifugo::unistream::CentrifugoUniStream::Stub> stub_;
 
-    // Corrected the namespace for the Push type in the ClientReader
     std::unique_ptr<grpc::ClientReader<centrifugal::centrifugo::unistream::Push>> stream_;
+    
+    // Mutex to protect access to the subscriptions map
+    std::mutex subs_mutex_;
+    // Map to store subscription requests
+    std::map<std::string, centrifugal::centrifugo::unistream::SubscribeRequest> subscriptions_;
 };
 
 #endif // CENTRIFUGO_CLIENT_H
