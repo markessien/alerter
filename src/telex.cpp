@@ -3,7 +3,6 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <iostream>
-#include "centrifugo/centrifugo.h"
 
 using json = nlohmann::json;
 
@@ -69,30 +68,73 @@ std::string Telex::getConnectionToken() {
 void Telex::testTelex() {
     std::cout << "Login successful" << std::endl;
     std::string connectionToken = getConnectionToken();
-    if (!connectionToken.empty()) {
-        std::cout << "Connection Token: " << connectionToken << std::endl;
-    } else {
-        std::cerr << "Failed to get connection token" << std::endl;
+    if (connectionToken.empty()) {
+        std::cerr << "Failed to get connection token, aborting." << std::endl;
+        return;
     }
+    std::cout << "Connection Token: " << connectionToken << std::endl;
 
     auto organisations = getUserOrganisations();
+
+    std::map<std::string, std::string> subscriptions;
     for (const auto& org : organisations) {
         std::string channel = org.id + "/" + user_id_;
         std::string subscriptionToken = getSubscriptionToken(channel);
         if (!subscriptionToken.empty()) {
             std::cout << "Subscription Token for " << org.name << ": " << subscriptionToken << std::endl;
+            subscriptions[channel] = subscriptionToken;
         } else {
             std::cerr << "Failed to get subscription token for " << org.name << std::endl;
         }
     }
- 
-    CentrifugoClient client;
-    for (const auto& org : organisations) {
-        std::string channel = org.id + "/" + user_id_;
-        client.Subscribe(channel);
+
+    if (!subscriptions.empty()) {
+        connectAndSubscribeViaWebSocket(connectionToken, subscriptions);
+    } else {
+        std::cerr << "No channels to subscribe to." << std::endl;
     }
-    client.Connect("rtc.telex.im:11000", connectionToken);
 }
+
+void Telex::connectAndSubscribeViaWebSocket(
+    const std::string& connectionToken,
+    const std::map<std::string, std::string>& subscriptions
+) {
+    std::string ws_url = "wss://api.telex.im/centrifugo";
+    webSocket_.setUrl(ws_url);
+
+    webSocket_.setOnMessageCallback(
+        [this, connectionToken, subscriptions](const ix::WebSocketMessagePtr& msg) {
+            if (msg->type == ix::WebSocketMessageType::Open) {
+                std::cout << "WebSocket connection established." << std::endl;
+
+                json connect_cmd;
+                connect_cmd["token"] = connectionToken;
+
+                json subs_obj;
+                for (const auto& pair : subscriptions) {
+                    const std::string& channel = pair.first;
+                    const std::string& subToken = pair.second;
+                    subs_obj[channel] = { {"token", subToken} };
+                }
+                connect_cmd["subs"] = subs_obj;
+
+                std::cout << "Sending connect command: " << connect_cmd.dump(2) << std::endl;
+                webSocket_.send(connect_cmd.dump());
+
+            } else if (msg->type == ix::WebSocketMessageType::Message) {
+                std::cout << "Received message: " << msg->str << std::endl;
+
+            } else if (msg->type == ix::WebSocketMessageType::Error) {
+                std::cerr << "WebSocket error: " << msg->errorInfo.reason << std::endl;
+            } else if (msg->type == ix::WebSocketMessageType::Close) {
+                std::cout << "WebSocket connection closed." << std::endl;
+            }
+        }
+    );
+
+    webSocket_.start();
+}
+
 
 std::string Telex::getSubscriptionToken(const std::string& channel) {
     httplib::Client cli(base_url);

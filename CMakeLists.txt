@@ -8,8 +8,7 @@ find_package(wxWidgets CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-find_package(gRPC CONFIG REQUIRED)
-find_package(Protobuf CONFIG REQUIRED)
+find_package(ixwebsocket CONFIG REQUIRED)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "res/resources.cpp" "src/*.cc")
 
@@ -25,14 +24,14 @@ target_link_libraries(telexstart PRIVATE
     wx::core
     wx::base
     nlohmann_json::nlohmann_json
-    gRPC::grpc++
-    protobuf::libprotobuf
+    ixwebsocket::ixwebsocket
     # Windows-specific libraries needed by your original file
     wininet
     ws2_32
     rpcrt4
     comctl32
     gdiplus
+    Bcrypt
 )
 
 if(MSVC)

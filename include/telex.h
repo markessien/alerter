@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <ixwebsocket/IXWebSocket.h>
 
 struct Organisation {
     std::string id;
@@ -23,6 +25,13 @@ private:
     std::string notification_token_;
     std::string access_token_;
     std::string user_id_;
+
+    void connectAndSubscribeViaWebSocket(
+        const std::string& connectionToken,
+        const std::map<std::string, std::string>& subscriptions
+    );
+
+    ix::WebSocket webSocket_;
 };
 
 #endif // TELEX_H

@@ -8,8 +8,7 @@
       "name": "cpp-httplib",
       "features": ["openssl"]
     },
-    "grpc",
-    "protobuf"
+    "ixwebsocket"
   ],
   "builtin-baseline": "6ecbbbdf31cba47aafa7cf6189b1e73e10ac61f8",
   "vcpkg-configuration": {
