@@ -28,7 +28,7 @@ public:
      * @param jwt_token The JWT for authentication.
      * @return True if the connection was successfully established, false otherwise.
      */
-    bool Connect(const std::string& server_address, const std::string& jwt_token);
+    bool Connect(const std::string& server_address, const std::string& auth_token);
 
     /**
      * @brief Disconnects from the stream and stops the listening thread.

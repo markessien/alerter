@@ -14,7 +14,7 @@ CentrifugoClient::~CentrifugoClient() {
     }
 }
 
-bool CentrifugoClient::Connect(const std::string& server_address, const std::string& jwt_token) {
+bool CentrifugoClient::Connect(const std::string& server_address, const std::string& auth_token) {
     if (IsConnected()) {
         std::cerr << "Already connected." << std::endl;
         return false;
@@ -27,8 +27,9 @@ bool CentrifugoClient::Connect(const std::string& server_address, const std::str
 
     // 2. Prepare the request
     context_ = std::make_unique<grpc::ClientContext>();
+    
     ConnectRequest request;
-    request.set_token(jwt_token);
+    request.set_token(auth_token);
 
     // 3. Initiate the stream
     stream_ = stub_->Consume(context_.get(), request);

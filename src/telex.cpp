@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <iostream>
+#include "centrifugo/centrifugo.h"
 
 using json = nlohmann::json;
 
@@ -84,6 +85,9 @@ void Telex::testTelex() {
             std::cerr << "Failed to get subscription token for " << org.name << std::endl;
         }
     }
+
+    CentrifugoClient client;
+    client.Connect("https://api.telex.im:11000/centrifugo", connectionToken);
 }
 
 std::string Telex::getSubscriptionToken(const std::string& channel) {

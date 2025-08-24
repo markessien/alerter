@@ -8,7 +8,10 @@ find_package(wxWidgets CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-file(GLOB_RECURSE SOURCES "src/*.cpp" "res/resources.cpp")
+find_package(gRPC CONFIG REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+
+file(GLOB_RECURSE SOURCES "src/*.cpp" "res/resources.cpp" "src/*.cc")
 
 add_executable(telexstart ${SOURCES})
 
@@ -22,6 +25,8 @@ target_link_libraries(telexstart PRIVATE
     wx::core
     wx::base
     nlohmann_json::nlohmann_json
+    gRPC::grpc++
+    protobuf::libprotobuf
     # Windows-specific libraries needed by your original file
     wininet
     ws2_32
@@ -40,11 +45,11 @@ if(MSVC)
     # Configure settings for Debug vs. Release
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         # Use the Multithreaded-Debug DLL runtime
-        target_compile_options(telexstart PRIVATE /MTd /Zi /Od)
+        target_compile_options(telexstart PRIVATE /MDd /Zi /Od)
         target_link_options(telexstart PRIVATE /DEBUG)
         set_target_properties(telexstart PROPERTIES OUTPUT_NAME "telexstart_d")
     else()
         # Use the Multithreaded DLL runtime for Release
-        target_compile_options(telexstart PRIVATE /MT /O2)
+        target_compile_options(telexstart PRIVATE /MD /O2)
     endif()
 endif()
