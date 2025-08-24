@@ -99,7 +99,8 @@ void Telex::connectAndSubscribeViaWebSocket(
     const std::string& connectionToken,
     const std::map<std::string, std::string>& subscriptions
 ) {
-    std::string ws_url = "wss://api.telex.im/centrifugo";
+    // The URL is likely correct for the bidirectional endpoint
+    std::string ws_url = "wss://api.telex.im/centrifugo/connection/websocket";
     webSocket_.setUrl(ws_url);
 
     webSocket_.setOnMessageCallback(
@@ -107,8 +108,8 @@ void Telex::connectAndSubscribeViaWebSocket(
             if (msg->type == ix::WebSocketMessageType::Open) {
                 std::cout << "WebSocket connection established." << std::endl;
 
-                json connect_cmd;
-                connect_cmd["token"] = connectionToken;
+                json connect_params;
+                connect_params["token"] = connectionToken;
 
                 json subs_obj;
                 for (const auto& pair : subscriptions) {
@@ -116,18 +117,33 @@ void Telex::connectAndSubscribeViaWebSocket(
                     const std::string& subToken = pair.second;
                     subs_obj[channel] = { {"token", subToken} };
                 }
-                connect_cmd["subs"] = subs_obj;
+                if (!subs_obj.empty()) {
+                    connect_params["subs"] = subs_obj;
+                }
 
-                std::cout << "Sending connect command: " << connect_cmd.dump(2) << std::endl;
-                webSocket_.send(connect_cmd.dump());
+                json command;
+                command["id"] = command_id_++;
+                command["connect"] = connect_params;
+
+                std::cout << "Sending connect command: " << command.dump(2) << std::endl;
+                // Send the correctly formatted command
+                webSocket_.send(command.dump());
 
             } else if (msg->type == ix::WebSocketMessageType::Message) {
+
+                if (msg->str == "{}") {
+                    webSocket_.send("{}");
+                return;
+            }
+
                 std::cout << "Received message: " << msg->str << std::endl;
 
             } else if (msg->type == ix::WebSocketMessageType::Error) {
                 std::cerr << "WebSocket error: " << msg->errorInfo.reason << std::endl;
             } else if (msg->type == ix::WebSocketMessageType::Close) {
-                std::cout << "WebSocket connection closed." << std::endl;
+                // Now you can inspect the close reason for more info
+                std::cout << "WebSocket connection closed. Code: " << msg->closeInfo.code 
+                          << ", Reason: " << msg->closeInfo.reason << std::endl;
             }
         }
     );

@@ -25,6 +25,7 @@ private:
     std::string notification_token_;
     std::string access_token_;
     std::string user_id_;
+    uint32_t command_id_ = 1;
 
     void connectAndSubscribeViaWebSocket(
         const std::string& connectionToken,
