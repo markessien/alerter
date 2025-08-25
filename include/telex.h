@@ -21,7 +21,6 @@ public:
     void login(const std::string& email, const std::string& password);
     void Exit();
     std::vector<Organisation> getOrganisations();
-    void SetParent(wxEvtHandler* pParent) { m_pParent = pParent; }
 
 protected:
     virtual ExitCode Entry();

@@ -111,10 +111,10 @@ void NotificationWindow::CreateNotificationWindow(wxWindow* parent,
 }
 
 NotificationWindow::NotificationWindow(wxWindow* parent,
-    const wxString& title, Telex* telex) // Add Telex* parameter
+    const wxString& title)
     : wxFrame(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxSTAY_ON_TOP | wxFRAME_NO_TASKBAR),
       m_taskBarIcon(nullptr),
-      m_telex(telex) // Initialize m_telex
+      m_telex(nullptr)
 {
     CreateNotificationWindow(parent, title, 350, 40);
     m_taskBarIcon = new TaskBarIcon(this);
@@ -331,10 +331,10 @@ void NotificationWindow::OnWebSocketError(wxCommandEvent& event)
 void NotificationWindow::OnShowNotification(wxCommandEvent& event)
 {
     wxString channelName = event.GetString();
-    wxStringClientData* clientData = static_cast<wxStringClientData*>(event.GetClientObject());
-    wxString channelDescription = clientData->GetData();
+    // wxStringClientData* clientData = static_cast<wxStringClientData*>(event.GetClientObject());
+    // wxString channelDescription = clientData->GetData();
     
-    AddNotification(channelName, "New unread message", "", channelDescription, "");
+    AddNotification(channelName, "New unread message", "", channelName, "");
 }
 
 void NotificationWindow::OnClose(wxCloseEvent& event)
