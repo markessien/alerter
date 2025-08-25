@@ -5,6 +5,7 @@
 #include "login_dialog.h" // Include LoginDialog header
 #include <wx/xrc/xmlres.h>
 #include "images.h"
+#include "events.h"
 
 #ifdef __WXMSW__
 #include <windows.h>
@@ -127,6 +128,10 @@ NotificationWindow::NotificationWindow(wxWindow* parent,
     Bind(wxEVT_COMMAND_MYTHREAD_NOTIFICATION, &NotificationWindow::OnNotification, this);
     Bind(wxEVT_COMMAND_SHOW_LOGIN_DIALOG, &NotificationWindow::ShowLoginDialog, this); // Bind custom event
     Bind(wxEVT_COMMAND_TEST_NOTIFICATION, &NotificationWindow::OnTestNotification, this);
+    Bind(wxEVT_LOGIN_SUCCESS, &NotificationWindow::OnLoginSuccess, this);
+    Bind(wxEVT_LOGIN_FAILURE, &NotificationWindow::OnLoginFailure, this);
+    Bind(wxEVT_WEBSOCKET_ERROR, &NotificationWindow::OnWebSocketError, this);
+    Bind(wxEVT_SHOW_NOTIFICATION, &NotificationWindow::OnShowNotification, this);
     
 
     m_notificationTimer->Start(1000);
@@ -304,6 +309,32 @@ void NotificationWindow::OnNotification(wxThreadEvent& event)
 void NotificationWindow::OnCloseButtonClick(wxCommandEvent& event)
 {
     this->Hide();
+}
+
+void NotificationWindow::OnLoginSuccess(wxCommandEvent& event)
+{
+    wxMessageBox("Login successful!", "Login", wxOK | wxICON_INFORMATION);
+}
+
+void NotificationWindow::OnLoginFailure(wxCommandEvent& event)
+{
+    wxMessageBox("Login failed. Please check your credentials and try again.", "Login Failed", wxOK | wxICON_ERROR);
+    wxCommandEvent showLoginEvent(wxEVT_COMMAND_SHOW_LOGIN_DIALOG);
+    wxPostEvent(this, showLoginEvent);
+}
+
+void NotificationWindow::OnWebSocketError(wxCommandEvent& event)
+{
+    wxMessageBox("WebSocket error: " + event.GetString(), "WebSocket Error", wxOK | wxICON_ERROR);
+}
+
+void NotificationWindow::OnShowNotification(wxCommandEvent& event)
+{
+    wxString channelName = event.GetString();
+    wxStringClientData* clientData = static_cast<wxStringClientData*>(event.GetClientObject());
+    wxString channelDescription = clientData->GetData();
+    
+    AddNotification(channelName, "New unread message", "", channelDescription, "");
 }
 
 void NotificationWindow::OnClose(wxCloseEvent& event)

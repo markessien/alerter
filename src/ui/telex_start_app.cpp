@@ -19,9 +19,9 @@ bool TelexStartApp::OnInit()
     wxImage::AddHandler(new wxPNGHandler);
     wxImage::AddHandler(new wxICOHandler);
 
-    m_telex = new Telex(); // Initialize Telex instance
-
-    m_frame = new NotificationWindow(NULL, "TELEX", m_telex); // Pass Telex instance to NotificationWindow
+    m_telex = new Telex(nullptr);
+    m_frame = new NotificationWindow(NULL, "TELEX", m_telex);
+    m_telex->Run();
     m_messaging = new Messaging(m_frame);
 
     m_messaging->Start();
@@ -39,6 +39,8 @@ int TelexStartApp::OnExit()
     }
     if (m_telex)
     {
+        m_telex->Exit();
+        m_telex->Wait();
         delete m_telex;
         m_telex = NULL;
     }

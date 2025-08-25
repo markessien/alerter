@@ -10,7 +10,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 
 find_package(ixwebsocket CONFIG REQUIRED)
 
-file(GLOB_RECURSE SOURCES "src/*.cpp" "res/resources.cpp" "src/*.cc")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "res/resources.cpp" "src/*.cc" "src/ui/*.cpp")
 
 add_executable(telexstart ${SOURCES})
 

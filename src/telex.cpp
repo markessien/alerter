@@ -3,15 +3,91 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <iostream>
+#include "events.h"
 
 using json = nlohmann::json;
 
+wxDEFINE_EVENT(wxEVT_LOGIN_REQUEST, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_LOGIN_SUCCESS, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_LOGIN_FAILURE, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_WEBSOCKET_ERROR, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_SHOW_NOTIFICATION, wxCommandEvent);
 
-Telex::Telex() {
+Telex::Telex(wxEvtHandler* pParent) : wxThread(wxTHREAD_JOINABLE), m_pParent(pParent), m_queue(pParent) {
     base_url = "https://api.staging.telex.im";
 }
 
-bool Telex::login(const std::string& email, const std::string& password) {
+Telex::~Telex() {
+    webSocket_.stop();
+}
+
+void Telex::login(const std::string& email, const std::string& password) {
+    Job job;
+    job.command = CMD_LOGIN;
+    job.string_arg1 = email;
+    job.string_arg2 = password;
+    m_queue.AddJob(job);
+}
+
+void Telex::Exit()
+{
+    Job job;
+    job.command = CMD_EXIT;
+    m_queue.AddJob(job);
+}
+
+std::vector<Organisation> Telex::getOrganisations() {
+    return organisations_;
+}
+
+wxThread::ExitCode Telex::Entry() {
+    while (!TestDestroy()) {
+        Job job = m_queue.Pop();
+        if (TestDestroy()) break;
+
+        switch (job.command) {
+            case CMD_LOGIN:
+            {
+                if (doLogin(job.string_arg1.ToStdString(), job.string_arg2.ToStdString())) {
+                    fetchUserOrganisations();
+                    std::string connectionToken = getConnectionToken();
+                    if (!connectionToken.empty()) {
+                        std::map<std::string, std::string> subscriptions;
+                        for (const auto& org : organisations_) {
+                            std::string channel = org.id + "/" + user_id_;
+                            std::string subscriptionToken = getSubscriptionToken(channel);
+                            if (!subscriptionToken.empty()) {
+                                subscriptions[channel] = subscriptionToken;
+                            }
+                        }
+                        if (!subscriptions.empty()) {
+                            connectAndSubscribeViaWebSocket(connectionToken, subscriptions);
+                            wxCommandEvent event(wxEVT_LOGIN_SUCCESS);
+                            m_queue.Report(event);
+                        } else {
+                            wxCommandEvent event(wxEVT_LOGIN_FAILURE);
+                            m_queue.Report(event);
+                        }
+                    } else {
+                        wxCommandEvent event(wxEVT_LOGIN_FAILURE);
+                        m_queue.Report(event);
+                    }
+                } else {
+                    wxCommandEvent event(wxEVT_LOGIN_FAILURE);
+                    m_queue.Report(event);
+                }
+                break;
+            }
+            case CMD_EXIT:
+            {
+                return 0;
+            }
+        }
+    }
+    return 0;
+}
+
+bool Telex::doLogin(const std::string& email, const std::string& password) {
     httplib::Client cli(base_url);
 
     json request_body;
@@ -38,12 +114,10 @@ bool Telex::login(const std::string& email, const std::string& password) {
             if (data.contains("user") && data["user"].contains("id")) {
                 user_id_ = data["user"]["id"];
             }
-            testTelex();
             return true;
         }
     }
 
-    // Login failed
     std::cerr << "Login failed. Status: " << res->status << std::endl;
     std::cerr << "Response body: " << res->body << std::endl;
     return false;
@@ -65,49 +139,16 @@ std::string Telex::getConnectionToken() {
     return "";
 }
 
-void Telex::testTelex() {
-    std::cout << "Login successful" << std::endl;
-    std::string connectionToken = getConnectionToken();
-    if (connectionToken.empty()) {
-        std::cerr << "Failed to get connection token, aborting." << std::endl;
-        return;
-    }
-    std::cout << "Connection Token: " << connectionToken << std::endl;
-
-    auto organisations = getUserOrganisations();
-
-    std::map<std::string, std::string> subscriptions;
-    for (const auto& org : organisations) {
-        std::string channel = org.id + "/" + user_id_;
-        std::string subscriptionToken = getSubscriptionToken(channel);
-        if (!subscriptionToken.empty()) {
-            std::cout << "Subscription Token for " << org.name << ": " << subscriptionToken << std::endl;
-            subscriptions[channel] = subscriptionToken;
-        } else {
-            std::cerr << "Failed to get subscription token for " << org.name << std::endl;
-        }
-    }
-
-    if (!subscriptions.empty()) {
-        connectAndSubscribeViaWebSocket(connectionToken, subscriptions);
-    } else {
-        std::cerr << "No channels to subscribe to." << std::endl;
-    }
-}
-
 void Telex::connectAndSubscribeViaWebSocket(
     const std::string& connectionToken,
     const std::map<std::string, std::string>& subscriptions
 ) {
-    // The URL is likely correct for the bidirectional endpoint
     std::string ws_url = "wss://api.telex.im/centrifugo/connection/websocket";
     webSocket_.setUrl(ws_url);
 
     webSocket_.setOnMessageCallback(
         [this, connectionToken, subscriptions](const ix::WebSocketMessagePtr& msg) {
             if (msg->type == ix::WebSocketMessageType::Open) {
-                std::cout << "WebSocket connection established." << std::endl;
-
                 json connect_params;
                 connect_params["token"] = connectionToken;
 
@@ -124,25 +165,38 @@ void Telex::connectAndSubscribeViaWebSocket(
                 json command;
                 command["id"] = command_id_++;
                 command["connect"] = connect_params;
-
-                std::cout << "Sending connect command: " << command.dump(2) << std::endl;
-                // Send the correctly formatted command
                 webSocket_.send(command.dump());
 
             } else if (msg->type == ix::WebSocketMessageType::Message) {
-
                 if (msg->str == "{}") {
                     webSocket_.send("{}");
-                return;
-            }
-
-                std::cout << "Received message: " << msg->str << std::endl;
+                    return;
+                }
+                
+                try {
+                    json data = json::parse(msg->str);
+                    if (data.contains("push") && data["push"].contains("pub") && data["push"]["pub"].contains("data")) {
+                        auto& pub_data = data["push"]["pub"]["data"];
+                        if (pub_data.contains("notification_type") && pub_data["notification_type"] == "unread_thread_change") {
+                            if (pub_data.contains("data")) {
+                                auto& notification_data = pub_data["data"];
+                                wxCommandEvent* event = new wxCommandEvent(wxEVT_SHOW_NOTIFICATION);
+                                event->SetString(notification_data["name"].get<std::string>());
+                                event->SetClientData(new wxStringClientData(notification_data["description"].get<std::string>()));
+                                wxQueueEvent(m_pParent, event);
+                            }
+                        }
+                    }
+                } catch (const json::parse_error& e) {
+                    std::cerr << "JSON parse error: " << e.what() << std::endl;
+                }
 
             } else if (msg->type == ix::WebSocketMessageType::Error) {
-                std::cerr << "WebSocket error: " << msg->errorInfo.reason << std::endl;
+                wxCommandEvent* event = new wxCommandEvent(wxEVT_WEBSOCKET_ERROR);
+                event->SetString(msg->errorInfo.reason);
+                wxQueueEvent(m_pParent, event);
             } else if (msg->type == ix::WebSocketMessageType::Close) {
-                // Now you can inspect the close reason for more info
-                std::cout << "WebSocket connection closed. Code: " << msg->closeInfo.code 
+                std::cout << "WebSocket connection closed. Code: " << msg->closeInfo.code
                           << ", Reason: " << msg->closeInfo.reason << std::endl;
             }
         }
@@ -150,7 +204,6 @@ void Telex::connectAndSubscribeViaWebSocket(
 
     webSocket_.start();
 }
-
 
 std::string Telex::getSubscriptionToken(const std::string& channel) {
     httplib::Client cli(base_url);
@@ -171,7 +224,7 @@ std::string Telex::getSubscriptionToken(const std::string& channel) {
     return "";
 }
 
-std::vector<Organisation> Telex::getUserOrganisations() {
+void Telex::fetchUserOrganisations() {
     httplib::Client cli(base_url);
     httplib::Headers headers = {
         {"Authorization", "Bearer " + access_token_}
@@ -179,17 +232,14 @@ std::vector<Organisation> Telex::getUserOrganisations() {
 
     auto res = cli.Get("/api/v1/users/organisations", headers);
     if (res && res->status == 200) {
-        std::cout << "Organisations response: " << res->body << std::endl;
         json response_body = json::parse(res->body);
-        std::vector<Organisation> orgs;
+        organisations_.clear();
         if (response_body.contains("data") && response_body["data"].is_array()) {
             for (const auto& org_json : response_body["data"]) {
                 if (org_json.contains("id") && org_json.contains("name")) {
-                    orgs.push_back({org_json["id"], org_json["name"]});
+                    organisations_.push_back({org_json["id"], org_json["name"]});
                 }
             }
         }
-        return orgs;
     }
-    return {};
 }

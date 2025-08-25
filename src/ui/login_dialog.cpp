@@ -81,17 +81,8 @@ void LoginDialog::OnLogin(wxCommandEvent& event)
         return;
     }
 
-    // For now, just show a message and close
-    if (m_telex->login(GetUsername().ToStdString(), GetPassword().ToStdString()))
-    {
-        wxMessageBox(wxT("Login successful!"), wxT("Login"), wxICON_INFORMATION);
-        EndModal(wxID_OK);
-    }
-    else
-    {
-        wxMessageBox(wxT("Login failed. Please check your username and password."),
-                     wxT("Login Error"), wxICON_ERROR);
-    }
+    m_telex->login(GetUsername().ToStdString(), GetPassword().ToStdString());
+    EndModal(wxID_OK);
 }
 
 void LoginDialog::OnCancel(wxCommandEvent& event)

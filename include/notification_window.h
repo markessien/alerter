@@ -38,6 +38,10 @@ private:
     void OnNotification(wxThreadEvent& event);
     void OnRequestExitApp(wxCommandEvent& event);
     void OnTestNotification(wxCommandEvent& event);
+    void OnLoginSuccess(wxCommandEvent& event);
+    void OnLoginFailure(wxCommandEvent& event);
+    void OnWebSocketError(wxCommandEvent& event);
+    void OnShowNotification(wxCommandEvent& event);
 
     wxPoint m_delta;
     NotificationManager notifications;
